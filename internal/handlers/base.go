@@ -16,5 +16,5 @@ func BaseHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 	msg.ReplyToMessageID = update.Message.MessageID
 
-	_, _ = bot.Send(msg)
+	//_, _ = bot.Send(msg)
 }
