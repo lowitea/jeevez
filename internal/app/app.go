@@ -4,6 +4,7 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/lowitea/jeevez/internal/handlers"
+	"github.com/lowitea/jeevez/internal/scheduler"
 	"log"
 	"os"
 )
@@ -25,6 +26,9 @@ func Run() {
 	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	// запуск фоновых задач
+	go scheduler.Run(bot)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 1
