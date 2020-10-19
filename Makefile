@@ -2,8 +2,6 @@
 	help
 	check
 	build
-	push
-	pull
 	run
 	deploy
 
@@ -16,36 +14,13 @@ help:  ## Список команд
 OVERRIDE=`test -f deploy/docker-compose.override.yml && \
           echo '-f deploy/docker-compose.override.yml'`
 
-check:  ## Запуск проверок проекта в докере
-	docker-compose \
-		-f deploy/docker-compose.autotests.yml \
-	    ${OVERRIDE} \
-		--project-directory . \
-		run --rm autotests
-	docker-compose  \
-		-f deploy/docker-compose.autotests.yml \
-		${OVERRIDE} \
-		--project-directory . \
-		stop
+check:  ## Запуск проверок проекта
+	golangci-lint run
 
-build:  ## Сборка образа докера
-	test -z "${GITHUB_SHA}" || echo "${GITHUB_SHA}" > .git_commit_sha
-	test -z "${GITHUB_REF}" || echo "${GITHUB_REF}" > .git_ref_tag
-	docker-compose \
-		-f deploy/docker-compose.yml \
-	    ${OVERRIDE} \
-		--project-directory . \
-		build --pull --compress
+build:  ## Сборка приложения
+	CGO_ENABLED=0 \
+	GOOS=linux \
+	go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main ./cmd/jeevez/main.go
 
-push:  ## Публикация образа докера в хаб
-	docker-compose -f deploy/docker-compose.yml push
-
-pull:  ## Скачивание образа докера с хаба
-	docker-compose -f deploy/docker-compose.yml pull
-
-run:  ## Запуск проекта в докере
-	docker-compose \
-	    -f deploy/docker-compose.yml \
-	    ${OVERRIDE} \
-		--project-directory . \
-	    up
+run:  ## Запуск проекта
+	go run cmd/jeevez/main.go
