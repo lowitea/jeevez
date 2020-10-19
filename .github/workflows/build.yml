@@ -17,7 +17,8 @@ jobs:
       with:
         username: ${{ secrets.CI_DOCKER_USER }}
         password: ${{ secrets.GITHUB_TOKEN }}
-        repository: jeevez/bot
+        repository: lowitea/jeevez/bot
         registry: docker.pkg.github.com
-        tags: ${{ github.event.release.tag_name }}, latest
+#        tags: ${{ github.event.release.tag_name }}, latest
+        tags: latest
         dockerfile: ./deploy/jeevez/Dockerfile
