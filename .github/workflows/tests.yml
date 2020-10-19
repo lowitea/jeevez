@@ -1,0 +1,38 @@
+name: autotests
+
+on: [push, pull_request]
+
+jobs:
+  autotests:
+    runs-on: ubuntu-latest
+    container: golang:1.14
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Download modules
+      run: |
+        go mod download
+
+    - uses: actions/cache@v2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Run autotests
+      run: |
+        go test -race -cover -coverprofile=coverage.out -v ./...
+        go tool cover -func=coverage.out
+
+  style-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.29

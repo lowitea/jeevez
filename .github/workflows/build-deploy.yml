@@ -1,0 +1,35 @@
+name: build
+
+on:
+  release:
+    types: [released]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: rastasheep/ubuntu-sshd
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.CI_DOCKER_USER }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        repository: lowitea/jeevez/bot
+        registry: docker.pkg.github.com
+        tags: ${{ github.event.release.tag_name }}, latest
+        dockerfile: ./deploy/jeevez/Dockerfile
+
+    - name: Deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.CI_HOST }}
+        username: ${{ secrets.CI_DEPLOY_USER }}
+        key: ${{ secrets.CI_DEPLOY_KEY }}
+        script: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u ${{ secrets.CI_DOCKER_USER }} --password-stdin
+          docker pull docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}
+          docker rm -f jeevez
+          docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}
