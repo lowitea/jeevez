@@ -17,5 +17,3 @@ jobs:
       with:
         tags: ${{ github.event.release.tag_name }}, latest
         file: ./deploy/jeevez/Dockerfile
-        username: ${{ secrets.CI_DOCKER_USER }}
-        password: ${{ secrets.GITHUB_TOKEN }}
