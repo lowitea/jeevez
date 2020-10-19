@@ -1,8 +1,9 @@
 name: build
 
 on:
+  push:
   release:
-    types: [released, push]
+    types: [released]
 
 jobs:
   build:
