@@ -28,11 +28,11 @@ jobs:
 
   lint-check:
     runs-on: ubuntu-latest
-    container: ubuntu
+    container: golang:1.14
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Run lint
       run: |
-        diff -u <(echo -n) <(gofmt -d -e ./)
+        "diff -u <(echo -n) <(gofmt -d -e ./)"
