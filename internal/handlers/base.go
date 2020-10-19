@@ -11,7 +11,7 @@ func BaseHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		return
 	}
 
-	log.Printf("[%s (%s)] %s", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text)
+	log.Printf("[%s (%d)] %s", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text)
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 	msg.ReplyToMessageID = update.Message.MessageID
