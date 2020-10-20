@@ -37,6 +37,6 @@ func Run() {
 	// запуск обработки сообщений
 	for update := range updates {
 		go handlers.BaseHandler(update, bot)
-		go handlers.BaseHandler(update, bot)
+		go handlers.VersionHandler(update, bot, cfg.App.Version)
 	}
 }

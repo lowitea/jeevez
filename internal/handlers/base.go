@@ -5,6 +5,19 @@ import (
 	"log"
 )
 
+func VersionHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, version string) {
+	if update.Message == nil { // ignore any non-Message Updates
+		return
+	}
+
+	if update.Message.Text != "/version" {
+		return
+	}
+
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, version)
+	_, _ = bot.Send(msg)
+}
+
 func BaseHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 
 	if update.Message == nil { // ignore any non-Message Updates
