@@ -21,6 +21,7 @@ jobs:
         registry: docker.pkg.github.com
         tags: ${{ github.event.release.tag_name }}, latest
         dockerfile: ./deploy/jeevez/Dockerfile
+        cache_froms: docker.pkg.github.com/lowitea/jeevez/bot:latest
 
     - name: Deploy
       uses: appleboy/ssh-action@master
