@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/handlers"
 	"github.com/lowitea/jeevez/internal/scheduler"
 	"log"
@@ -11,7 +12,7 @@ import (
 
 func Run() {
 	// инициализируем конфиг
-	cfg := Config{}
+	cfg := config.Config{}
 	err := envconfig.Process("jeevez", &cfg)
 	if err != nil {
 		log.Printf("env parse error %s", err)
@@ -26,7 +27,7 @@ func Run() {
 	// отправляем инфу о запуске
 	msg := tgbotapi.NewMessage(
 		cfg.Telegram.Admin,
-		"Я обновился! :)\nМоя новая версия: "+cfg.App.Version,
+		"🤵🏻 Я обновился! :)\nМоя новая версия: "+cfg.App.Version,
 	)
 	_, _ = bot.Send(msg)
 
@@ -43,7 +44,6 @@ func Run() {
 
 	// запуск обработки сообщений
 	for update := range updates {
-		go handlers.BaseHandler(update, bot)
-		go handlers.VersionHandler(update, bot, cfg.App.Version)
+		go handlers.BaseCommandHandler(update, bot, &cfg)
 	}
 }
