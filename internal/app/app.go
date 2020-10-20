@@ -13,16 +13,19 @@ import (
 func Run() {
 	// инициализируем конфиг
 	cfg := config.Config{}
-	err := envconfig.Process("jeevez", &cfg)
-	if err != nil {
+
+	if err := envconfig.Process("jeevez", &cfg); err != nil {
 		log.Printf("env parse error %s", err)
 		os.Exit(1)
 	}
 
 	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
 	if err != nil {
-		log.Panic(err)
+		log.Printf("error connect to telegram %s", err)
+		os.Exit(1)
 	}
+	log.Printf("Bot version: %s", cfg.App.Version)
+	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	// отправляем инфу о запуске
 	msg := tgbotapi.NewMessage(
@@ -30,10 +33,6 @@ func Run() {
 		"🤵🏻 Я обновился! :)\nМоя новая версия: "+cfg.App.Version,
 	)
 	_, _ = bot.Send(msg)
-
-	bot.Debug = true
-
-	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	// запуск фоновых задач
 	go scheduler.Run(bot)
