@@ -21,7 +21,6 @@ jobs:
 #        tags: ${{ github.event.release.tag_name }}, latest
         tags: latest
         dockerfile: ./deploy/jeevez/Dockerfile
-
       - name: Deploy
         run: |
           mkdir -p ~/.ssh
