@@ -30,6 +30,7 @@ jobs:
         username: ${{ secrets.CI_DEPLOY_USER }}
         key: ${{ secrets.CI_DEPLOY_KEY }}
         script: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u ${{ secrets.CI_DOCKER_USER }} --password-stdin
           docker pull docker.pkg.github.com/lowitea/jeevez/bot:latest
           docker rm -f jeevez
           docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} docker.pkg.github.com/lowitea/jeevez/bot:latest
