@@ -6,5 +6,6 @@ type Config struct {
 	}
 	Telegram struct {
 		Token string
+		Admin int64
 	}
 }

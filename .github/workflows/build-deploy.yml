@@ -34,4 +34,4 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u ${{ secrets.CI_DOCKER_USER }} --password-stdin
           docker pull docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}
           docker rm -f jeevez
-          docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}
+          docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} -e JEEVEZ_TELEGRAM_ADMIN=${{ secrets.JEEVEZ_TELEGRAM_ADMIN }} docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}

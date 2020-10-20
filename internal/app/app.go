@@ -23,6 +23,13 @@ func Run() {
 		log.Panic(err)
 	}
 
+	// отправляем инфу о запуске
+	msg := tgbotapi.NewMessage(
+		cfg.Telegram.Admin,
+		"Я обновился! :)\nМоя новая версия: "+cfg.App.Version,
+	)
+	_, _ = bot.Send(msg)
+
 	bot.Debug = true
 
 	log.Printf("Authorized on account %s", bot.Self.UserName)
