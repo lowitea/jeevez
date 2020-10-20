@@ -13,7 +13,7 @@ func Run(bot *tgbotapi.BotAPI) {
 	s := gocron.NewScheduler()
 	loc, _ := time.LoadLocation("Europe/Moscow")
 
-	_ = s.Every(1).Day().At("12:30").Loc(loc).Do(tasks.CovidTask(bot))
+	_ = s.Every(1).Day().At("10:00").Loc(loc).Do(tasks.CovidTask(bot))
 
 	<-s.Start()
 }
