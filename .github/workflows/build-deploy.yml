@@ -21,18 +21,3 @@ jobs:
 #        tags: ${{ github.event.release.tag_name }}, latest
         tags: latest
         dockerfile: ./deploy/jeevez/Dockerfile
-      - name: Deploy
-        run: |
-          mkdir -p ~/.ssh
-          echo "$CI_DEPLOY_KEY" | tr -d '\r' > ~/.ssh/id_rsa
-          chmod -R 700 ~/.ssh
-          echo "$CI_DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_rsa
-#          ssh $CI_USER_HOST 'docker pull docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}'
-          ssh $CI_USER_HOST 'docker pull docker.pkg.github.com/lowitea/jeevez/bot:latest'
-          ssh $CI_USER_HOST 'docker rm -f jeevez'
-#          ssh $CI_USER_HOST 'docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}'
-          ssh $CI_USER_HOST 'docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} docker.pkg.github.com/lowitea/jeevez/bot:latest'
-
