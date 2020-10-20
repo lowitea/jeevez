@@ -1,93 +1,108 @@
 package tasks
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"text/template"
 	"time"
 )
 
+// covidStat структура с ответом от апи статистки по ковиду
 type covidStat struct {
-	Confirmed      int
-	Deaths         int
-	Recovered      int
-	Confirmed_diff int
-	Deaths_diff    int
-	Recovered_diff int
-	Last_update    string
-	Active         int
-	Active_diff    int
-	Fatality_rate  float64
+	Confirmed     int     `json:"confirmed"`
+	Deaths        int     `json:"deaths"`
+	Recovered     int     `json:"recovered"`
+	ConfirmedDiff int     `json:"confirmed_diff"`
+	DeathsDiff    int     `json:"deaths_diff"`
+	RecoveredDiff int     `json:"recovered_diff"`
+	LastUpdate    string  `json:"last_update"`
+	Active        int     `json:"active"`
+	ActiveDiff    int     `json:"active_diff"`
+	FatalityRate  float64 `json:"fatality_rate"`
 }
 
+// Update метод для сложения структур covidStat
 func (stat *covidStat) Update(updStat covidStat) *covidStat {
 	stat.Confirmed += updStat.Confirmed
+	stat.ConfirmedDiff += updStat.ConfirmedDiff
 	stat.Deaths += updStat.Deaths
+	stat.DeathsDiff += updStat.DeathsDiff
 	stat.Recovered += updStat.Recovered
-	stat.Confirmed_diff += updStat.Confirmed_diff
-	stat.Deaths_diff += updStat.Deaths_diff
-	stat.Recovered_diff += updStat.Recovered_diff
-	stat.Last_update = updStat.Last_update
+	stat.RecoveredDiff += updStat.RecoveredDiff
+	stat.LastUpdate = updStat.LastUpdate
 	stat.Active += updStat.Active
-	stat.Active_diff += updStat.Active_diff
-	if stat.Fatality_rate != 0 && updStat.Fatality_rate != 0 {
-		stat.Fatality_rate = (stat.Fatality_rate + updStat.Fatality_rate) / 2
-	} else if stat.Fatality_rate == 0 {
-		stat.Fatality_rate = updStat.Fatality_rate
+	stat.ActiveDiff += updStat.ActiveDiff
+	if stat.FatalityRate != 0 && updStat.FatalityRate != 0 {
+		stat.FatalityRate = (stat.FatalityRate + updStat.FatalityRate) / 2
+	} else if stat.FatalityRate == 0 {
+		stat.FatalityRate = updStat.FatalityRate
 	}
 	return stat
 }
 
+// GetMessage вернуть строку для отправки в мессенджер
 func (stat *covidStat) GetMessage(data string, statName string) string {
-	msgTemplate := "\U0001F9A0 <b>COVID-19 Статистика [%s]</b>\n" +
-		"%s\n\n" +
-		"Подтверждённые: %d (+%d)\n" +
-		"Смерти: %d (+%d)\n" +
-		"Выздоровевшие: %d (+%d)\n" +
-		"Болеющие: %d (+%d)\n" +
-		"Летальность: %f\n\n" +
+	type Ctx struct {
+		Stat     *covidStat
+		Data     string
+		StatName string
+	}
+
+	msgTplString := "" +
+		"\U0001F9A0 <b>COVID-19 Статистика [{{ .StatName }}]</b>\n" +
+		"{{ .Data }}\n\n" +
+		"Подтверждённые: {{ .Stat.Confirmed }} (+{{ .Stat.ConfirmedDiff }})\n" +
+		"Смерти: {{ .Stat.Deaths }} (+{{ .Stat.DeathsDiff }})\n" +
+		"Выздоровевшие: {{ .Stat.Recovered }} (+{{ .Stat.RecoveredDiff }})\n" +
+		"Болеющие: {{ .Stat.Active }} (+{{ .Stat.ActiveDiff }})\n" +
+		"Летальность: {{ printf \"%.6f\" .Stat.FatalityRate }}\n\n" +
 		"https://yandex.ru/covid19/stat"
-	return fmt.Sprintf(
-		msgTemplate,
-		statName,
-		data,
-		stat.Confirmed,
-		stat.Confirmed_diff,
-		stat.Deaths,
-		stat.Deaths_diff,
-		stat.Recovered,
-		stat.Recovered_diff,
-		stat.Active,
-		stat.Active_diff,
-		stat.Fatality_rate,
-	)
+
+	msgTpl := template.Must(
+		template.New("msgTpl").Parse(msgTplString))
+
+	ctx := Ctx{stat, data, statName}
+
+	msg := bytes.Buffer{}
+	if err := msgTpl.Execute(&msg, ctx); err != nil {
+		panic(err)
+	}
+
+	return msg.String()
 }
 
+// apiResp ответ от апи статистики
 type apiResp struct {
 	Data []covidStat
 }
 
-func getData(url string) covidStat {
+// получения статистики с апи
+func getData(url string) (covidStat, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		print(err)
+		log.Printf("Error get data: %s", err)
+		return covidStat{}, err
 	}
 
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		print(err)
+		log.Printf("Error get data: %s", err)
+		return covidStat{}, err
 	}
 
-	fmt.Print(string(body))
-
 	var data apiResp
-	_ = json.Unmarshal(body, &data)
+	if err := json.Unmarshal(body, &data); err != nil {
+		log.Printf("Error get data: %s", err)
+		return covidStat{}, err
+	}
 
 	var result covidStat
 
@@ -95,12 +110,13 @@ func getData(url string) covidStat {
 		result.Update(stat)
 	}
 
-	return result
+	return result, nil
 }
 
+// CovidTask таска рассылающая статистику по ковиду
 func CovidTask(bot *tgbotapi.BotAPI) func() {
 	return func() {
-		log.Printf("Task has started")
+		log.Printf("Covid task has started")
 
 		dt := time.Now().AddDate(0, 0, -1)
 		data := dt.Format("2006-01-02")
@@ -111,7 +127,11 @@ func CovidTask(bot *tgbotapi.BotAPI) func() {
 		}
 
 		for statName, statUrl := range statUrls {
-			stat := getData(fmt.Sprintf(statUrl, data))
+			stat, err := getData(fmt.Sprintf(statUrl, data))
+			if err != nil {
+				log.Printf("Error get data: %s", err)
+				continue
+			}
 			msg := tgbotapi.NewMessage(159096094, stat.GetMessage(data, statName))
 			msg.ParseMode = "HTML"
 			msg.DisableNotification = true

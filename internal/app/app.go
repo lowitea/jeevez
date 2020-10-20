@@ -10,6 +10,7 @@ import (
 	"os"
 )
 
+// Run функция запускающая бот
 func Run() {
 	// инициализируем конфиг
 	cfg := config.Config{}
