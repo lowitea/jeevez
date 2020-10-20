@@ -24,6 +24,11 @@ func cmdHelp(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *config.Config) {
 // BaseCommandHandler базовый обработчик для выполнения команд. получает сообщение
 // и если это сообщение - известная команда - вызывает нужную функцию
 func BaseCommandHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, cfg *config.Config) {
+	// выходим сразу, если сообщения нет
+	if update.Message == nil {
+		return
+	}
+
 	cmdFuncMap := map[string]func(update tgbotapi.Update, bot *tgbotapi.BotAPI, cfg *config.Config){
 		"/version": cmdVersion,
 		"/help":    cmdHelp,
