@@ -25,13 +25,10 @@ jobs:
 
     - name: Deploy
       run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.CI_DEPLOY_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
-        chmod -R 700 ~/.ssh
-        echo "${{ secrets.CI_DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-        chmod 644 ~/.ssh/known_hosts
         eval $(ssh-agent -s)
-        ssh-add ~/.ssh/id_ed25519
+        echo "${{ secrets.CI_DEPLOY_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
+        mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
+        echo "${{ secrets.CI_DEPLOY_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
         ssh ${{ secrets.CI_USER_HOST }} 'docker pull docker.pkg.github.com/lowitea/jeevez/bot:latest'
         ssh ${{ secrets.CI_USER_HOST }} 'docker rm -f jeevez'
         ssh ${{ secrets.CI_USER_HOST }} 'docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} docker.pkg.github.com/lowitea/jeevez/bot:latest'
