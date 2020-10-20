@@ -45,5 +45,6 @@ func Run() {
 	// запуск обработки сообщений
 	for update := range updates {
 		go handlers.BaseCommandHandler(update, bot, &cfg)
+		go handlers.CurrencyConverterHandler(update, bot, &cfg)
 	}
 }
