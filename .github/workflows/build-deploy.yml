@@ -27,9 +27,8 @@ jobs:
       run: |
         eval $(ssh-agent -s)
         echo "${{ secrets.CI_DEPLOY_KEY }}" | tr -d '\r' | ssh-add - > /dev/null
-        ssh-keyscan "${{ secrets.CI_HOST }}"
         mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
-        echo "${{ secrets.CI_DEPLOY_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+        echo "$(ssh-keyscan ${{ secrets.CI_HOST }})" >> ~/.ssh/known_hosts
         ssh ${{ secrets.CI_USER_HOST }} 'docker pull docker.pkg.github.com/lowitea/jeevez/bot:latest'
         ssh ${{ secrets.CI_USER_HOST }} 'docker rm -f jeevez'
         ssh ${{ secrets.CI_USER_HOST }} 'docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} docker.pkg.github.com/lowitea/jeevez/bot:latest'
