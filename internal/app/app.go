@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/allegro/bigcache"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/lowitea/jeevez/internal/config"
@@ -8,6 +9,7 @@ import (
 	"github.com/lowitea/jeevez/internal/scheduler"
 	"log"
 	"os"
+	"time"
 )
 
 // Run функция запускающая бот
@@ -35,6 +37,9 @@ func Run() {
 	)
 	_, _ = bot.Send(msg)
 
+	// инициализируем кеш
+	cache, _ := bigcache.NewBigCache(bigcache.DefaultConfig(12 * time.Hour))
+
 	// запуск фоновых задач
 	go scheduler.Run(bot)
 
@@ -45,6 +50,6 @@ func Run() {
 	// запуск обработки сообщений
 	for update := range updates {
 		go handlers.BaseCommandHandler(update, bot, &cfg)
-		go handlers.CurrencyConverterHandler(update, bot, &cfg)
+		go handlers.CurrencyConverterHandler(update, bot, cache)
 	}
 }

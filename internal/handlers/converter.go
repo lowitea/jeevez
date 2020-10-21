@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"fmt"
+	"github.com/allegro/bigcache"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/lowitea/jeevez/internal/config"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,20 +11,27 @@ import (
 	"strconv"
 )
 
-func getCurrencyRate(curPair string) (float64, error) {
-	resp, err := http.Get(fmt.Sprintf("https://free.currconv.com/api/v7/convert?"+
-		"q=%s&compact=ultra&apiKey=d65168e35590aedbdcc5", curPair))
-	if err != nil {
-		log.Printf("Error get data: %s", err)
-		return 0, err
-	}
+func getCurrencyRate(curPair string, cache *bigcache.BigCache) (float64, error) {
+	var body []byte
+	if entry, _ := cache.Get(curPair); entry != nil {
+		body = entry
+	} else {
+		resp, err := http.Get(fmt.Sprintf("https://free.currconv.com/api/v7/convert?"+
+			"q=%s&compact=ultra&apiKey=d65168e35590aedbdcc5", curPair))
+		if err != nil {
+			log.Printf("Error get data: %s", err)
+			return 0, err
+		}
 
-	defer resp.Body.Close()
+		defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("Error get data: %s", err)
-		return 0, err
+		body, err = ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Printf("Error get data: %s", err)
+			return 0, err
+		}
+
+		_ = cache.Set(curPair, body)
 	}
 
 	tpl := regexp.MustCompile(`{"\w{3}_\w{3}":(\d+.\d+)}`)
@@ -66,7 +73,7 @@ func getCurPair(firstCur string, secCur string) string {
 	return fmt.Sprintf("%s_%s", firstElem, secElem)
 }
 
-func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *config.Config) {
+func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, cache *bigcache.BigCache) {
 	// выходим сразу, если сообщения нет
 	if update.Message == nil {
 		return
@@ -88,7 +95,7 @@ func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *c
 	if currencyPair == "" {
 		result = value
 	} else {
-		curRate, err := getCurrencyRate(currencyPair)
+		curRate, err := getCurrencyRate(currencyPair, cache)
 		if err != nil {
 			return
 		}
