@@ -27,6 +27,15 @@ func cmdHelp(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *config.Config) {
 	_, _ = bot.Send(msg)
 }
 
+func cmdStart(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *config.Config) {
+	msgText := "" +
+		"Приветствую! Я Ваш личный бот помощник. 🤵🏻\n" +
+		"Готов помогать всем, чем умею. Чтобы узнать, подробнее, " +
+		"предлагаю использовать команду /help :)"
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+	_, _ = bot.Send(msg)
+}
+
 // BaseCommandHandler базовый обработчик для выполнения команд. получает сообщение
 // и если это сообщение - известная команда - вызывает нужную функцию
 func BaseCommandHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, cfg *config.Config) {
@@ -38,6 +47,7 @@ func BaseCommandHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, cfg *confi
 	cmdFuncMap := map[string]func(update tgbotapi.Update, bot *tgbotapi.BotAPI, cfg *config.Config){
 		"/version": cmdVersion,
 		"/help":    cmdHelp,
+		"/start":   cmdStart,
 	}
 
 	if cmdFunc, ok := cmdFuncMap[update.Message.Text]; ok {
