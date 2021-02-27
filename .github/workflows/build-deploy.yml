@@ -31,6 +31,9 @@ jobs:
         username: ${{ secrets.CI_DEPLOY_USER }}
         key: ${{ secrets.CI_DEPLOY_KEY }}
         script: |
+          rm -rf jeevez_deploy
+          git clone git@github.com:lowitea/jeevez.git jeevez_deploy
+          cd jeevez_deploy
           echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u ${{ secrets.CI_DOCKER_USER }} --password-stdin
           docker pull docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}
           JEEVEZ_APP_VERSION=${{ github.event.release.tag_name }} \
