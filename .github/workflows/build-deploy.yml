@@ -44,9 +44,9 @@ jobs:
           JEEVEZ_CYRRENCYAPI_TOKEN=${{ secrets.JEEVEZ_CYRRENCYAPI_TOKEN }} \
           docker-compose -f deploy/docker-compose.yml \
                          -f deploy/docker-compose.db.yml \
+          	             --project-directory . \
                          up \
                          -d \
                          --force-recreate \
-          	             --project-directory . \
                          jeevez
           false
