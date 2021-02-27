@@ -1,49 +1,27 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
-	"github.com/allegro/bigcache"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"io/ioutil"
+	"github.com/lowitea/jeevez/internal/models"
+	"gorm.io/gorm"
 	"log"
-	"net/http"
 	"regexp"
 	"strconv"
 )
 
-func getCurrencyRate(curPair string, cache *bigcache.BigCache) (float64, error) {
-	var body []byte
-	if entry, _ := cache.Get(curPair); entry != nil {
-		body = entry
-	} else {
-		resp, err := http.Get(fmt.Sprintf("https://free.currconv.com/api/v7/convert?"+
-			"q=%s&compact=ultra&apiKey=d65168e35590aedbdcc5", curPair))
-		if err != nil {
-			log.Printf("Error get data: %s", err)
-			return 0, err
-		}
-
-		defer func() { _ = resp.Body.Close() }()
-
-		body, err = ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Printf("Error get data: %s", err)
-			return 0, err
-		}
-
-		_ = cache.Set(curPair, body)
+// getCurrencyRate получает и возвращает валюту из базы
+func getCurrencyRate(db *gorm.DB, curPair string) (float64, error) {
+	var currencyRate models.CurrencyRate
+	result := db.First(&currencyRate, "name = ?", curPair)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return 0, result.Error
+	} else if result.Error != nil {
+		log.Printf("getting currency from db error: %s", result.Error)
+		return 0, result.Error
 	}
-
-	tpl := regexp.MustCompile(`{"\w{3}_\w{3}":(\d+.\d+)}`)
-	rateStr := tpl.FindStringSubmatch(string(body))[1]
-
-	rate, err := strconv.ParseFloat(rateStr, 64)
-	if err != nil {
-		log.Printf("Error get data: %s", err)
-		return 0, err
-	}
-
-	return rate, nil
+	return currencyRate.Value, nil
 }
 
 func getCurPair(firstCur string, secCur string) string {
@@ -73,14 +51,14 @@ func getCurPair(firstCur string, secCur string) string {
 	return fmt.Sprintf("%s_%s", firstElem, secElem)
 }
 
-func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, cache *bigcache.BigCache) {
+func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	// выходим сразу, если сообщения нет
 	if update.Message == nil {
 		return
 	}
 
 	expMsg := regexp.MustCompile(
-		`^(\d+)\s(доллар|долларов|рубль|рублей|евро)\sв\s(рубли|доллары|евро)$`)
+		`^(\d+)\s(доллар|долларов|доллара|рубль|рублей|рубля|евро)\sв\s(рубли|доллары|евро)$`)
 
 	tokens := expMsg.FindStringSubmatch(update.Message.Text)
 
@@ -95,7 +73,7 @@ func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, cach
 	if currencyPair == "" {
 		result = value
 	} else {
-		curRate, err := getCurrencyRate(currencyPair, cache)
+		curRate, err := getCurrencyRate(db, currencyPair)
 		if err != nil {
 			return
 		}
