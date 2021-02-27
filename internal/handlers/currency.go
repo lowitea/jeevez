@@ -68,11 +68,11 @@ func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 				"Попробуйте уточнить у меня список валют позднее."
 		} else {
 			var msgTextB bytes.Buffer
-			msgTextB.WriteString("Список доступных валютных пар:\n\n")
+			msgTextB.WriteString("Курсы всех доступных валютных пар:\n\n")
 
 			for _, curRate := range curRates {
-				msgTextB.WriteString("/currency_rate ")
 				msgTextB.WriteString(curRate.Name)
+				msgTextB.WriteString(fmt.Sprintf(":    %.6f", curRate.Value))
 				msgTextB.WriteString("\n")
 			}
 			msgText = msgTextB.String()
