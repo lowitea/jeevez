@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+
+  jeevez:
+    depends_on:
+      - jeevez-database
+
+  jeevez-database:
+    image: postgres:13
+    restart: unless-stopped
+    container_name: jeevez-database
+    environment:
+      - POSTGRES_USER=${JEEVEZ_DB_USER:-jeevez}
+      - POSTGRES_PASSWORD=${JEEVEZ_DB_PASSWORD:-jeevez}
+    volumes:
+      - "db-volume:/var/lib/postgresql/data"
+
+volumes:
+  db-volume:

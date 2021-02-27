@@ -33,5 +33,15 @@ jobs:
         script: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login https://docker.pkg.github.com -u ${{ secrets.CI_DOCKER_USER }} --password-stdin
           docker pull docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}
-          docker rm -f jeevez
-          docker run --name jeevez --rm -d -e JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} -e JEEVEZ_TELEGRAM_ADMIN=${{ secrets.JEEVEZ_TELEGRAM_ADMIN }} docker.pkg.github.com/lowitea/jeevez/bot:${{ github.event.release.tag_name }}
+          JEEVEZ_APP_VERSION=${{ github.event.release.tag_name }} \
+          JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} \
+          JEEVEZ_TELEGRAM_ADMIN=${{ secrets.JEEVEZ_TELEGRAM_ADMIN }} \
+          JEEVEZ_DB_USER=${{ secrets.JEEVEZ_DB_USER }} \
+          JEEVEZ_DB_PASSWORD=${{ secrets.JEEVEZ_DB_PASSWORD }} \
+          JEEVEZ_CYRRENCYAPI_TOKEN=${{ secrets.JEEVEZ_CYRRENCYAPI_TOKEN }} \
+          docker-compose -f deploy/docker-compose.yml \
+                         -f deploy/docker-compose.db.yml \
+                         up \
+                         -d \
+                         --force-recreate \
+                         jeevez

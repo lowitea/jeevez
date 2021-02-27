@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+
+  jeevez:
+    image: docker.pkg.github.com/lowitea/jeevez/bot:${JEEVEZ_APP_VERSION:-latest}
+    container_name: jeevez
+    restart: unless-stopped
+    environment:
+      - JEEVEZ_TELEGRAM_TOKEN
+      - JEEVEZ_TELEGRAM_ADMIN
+
+      - JEEVEZ_DB_HOST
+      - JEEVEZ_DB_PORT
+      - JEEVEZ_DB_USER
+      - JEEVEZ_DB_PASSWORD
+      - JEEVEZ_DB_DBNAME
+
+      - JEEVEZ_CYRRENCYAPI_TOKEN
