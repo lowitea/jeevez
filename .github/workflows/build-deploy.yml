@@ -47,5 +47,6 @@ jobs:
                          up \
                          -d \
                          --force-recreate \
+          	             --project-directory . \
                          jeevez
           false
