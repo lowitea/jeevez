@@ -41,7 +41,7 @@ jobs:
           JEEVEZ_TELEGRAM_ADMIN=${{ secrets.JEEVEZ_TELEGRAM_ADMIN }} \
           JEEVEZ_DB_USER=${{ secrets.JEEVEZ_DB_USER }} \
           JEEVEZ_DB_PASSWORD=${{ secrets.JEEVEZ_DB_PASSWORD }} \
-          JEEVEZ_CYRRENCYAPI_TOKEN=${{ secrets.JEEVEZ_CYRRENCYAPI_TOKEN }} \
+          JEEVEZ_CYRRENCYAPI_TOKEN=${{ secrets.JEEVEZ_CURRENCYAPI_TOKEN }} \
           docker-compose -f deploy/docker-compose.yml \
                          -f deploy/docker-compose.db.yml \
           	             --project-directory . \
