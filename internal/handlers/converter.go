@@ -23,7 +23,7 @@ func getCurrencyRate(curPair string, cache *bigcache.BigCache) (float64, error) 
 			return 0, err
 		}
 
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		body, err = ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -49,10 +49,10 @@ func getCurrencyRate(curPair string, cache *bigcache.BigCache) (float64, error) 
 func getCurPair(firstCur string, secCur string) string {
 	var firstElem string
 	var secElem string
-	if firstCur == "доллар" || firstCur == "долларов" {
+	if firstCur == "доллар" || firstCur == "долларов" || firstCur == "доллара" {
 		firstElem = "USD"
 	}
-	if firstCur == "рубль" || firstCur == "рублей" {
+	if firstCur == "рубль" || firstCur == "рублей" || firstCur == "рубля" {
 		firstElem = "RUB"
 	}
 	if firstCur == "евро" {
