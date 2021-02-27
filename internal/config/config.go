@@ -8,4 +8,14 @@ type Config struct {
 		Token string `required:"true"`
 		Admin int64  `required:"true"`
 	}
+	DB struct {
+		Host     string `default:"postgres"`
+		Port     int    `default:"5432"`
+		User     string `required:"true"`
+		Password string `required:"true"`
+		DBName   string `default:"jeevez"`
+	}
+	CurrencyAPI struct {
+		Token string `required:"true"`
+	}
 }
