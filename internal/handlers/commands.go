@@ -22,7 +22,10 @@ func cmdHelp(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *config.Config) {
 		"нынче рубль :)\n" +
 		"Напиши просто: `2000 долларов в рубли` или `1000 рублей в доллары`" +
 		"\n\n" +
-		"/̶c̶u̶r̶r̶e̶n̶c̶y̶R̶a̶t̶e̶ ̶-̶ ̶М̶о̶ж̶н̶о̶ ̶и̶ ̶п̶р̶о̶с̶т̶о̶ ̶к̶у̶р̶с̶ ̶т̶е̶к̶у̶щ̶и̶й̶ ̶п̶о̶с̶м̶о̶т̶р̶е̶т̶ь̶ (скоро)"
+		"/currency_rate USD_RUB - Можно и просто курс текущий доллара к " +
+		"рублю посмотреть например\n" +
+		"/currency_rate - А так команда без параметров покажет все " +
+		"доступные валютные пары)"
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 	_, _ = bot.Send(msg)
 }

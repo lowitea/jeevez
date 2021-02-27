@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // getCurrencyRate получает и возвращает валюту из базы
@@ -51,9 +53,62 @@ func getCurPair(firstCur string, secCur string) string {
 	return fmt.Sprintf("%s_%s", firstElem, secElem)
 }
 
+// cmdCurrencyRate команда /currency_rate показывает доступные пары валют или курс по конкретной паре
+func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+	tokens := strings.Split(update.Message.Text, " ")
+	var msgText string
+
+	// команда пришла без параметров, отправляем список валют
+	if len(tokens) == 1 {
+		var curRates []models.CurrencyRate
+		result := db.Find(&curRates)
+		if result.Error != nil {
+			log.Printf("getting currencies from db error: %s", result.Error)
+			msgText = "Я прошу прощения. Биржа не отвечает по телефону." +
+				"Попробуйте уточнить у меня список валют позднее."
+		} else {
+			var msgTextB bytes.Buffer
+			msgTextB.WriteString("Список доступных валютных пар:\n\n")
+
+			for _, curRate := range curRates {
+				msgTextB.WriteString("/currency_rate ")
+				msgTextB.WriteString(curRate.Name)
+				msgTextB.WriteString("\n")
+			}
+			msgText = msgTextB.String()
+		}
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+		msg.ReplyToMessageID = update.Message.MessageID
+		_, _ = bot.Send(msg)
+		return
+	}
+
+	// запросили конкретную валюту, пытаемся найти её в базе и отдаём результат
+	curPair := tokens[1]
+	curRate, err := getCurrencyRate(db, curPair)
+
+	if err != nil {
+		msgText = "К сожалению, я не смог найти курс Вашей валюты. " +
+			"Попробуйте проверить список доступных валют, повторив " +
+			"эту команду без параметров."
+	} else {
+		msgText = fmt.Sprintf("%f", curRate)
+	}
+
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+	msg.ReplyToMessageID = update.Message.MessageID
+	_, _ = bot.Send(msg)
+}
+
 func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	// выходим сразу, если сообщения нет
 	if update.Message == nil {
+		return
+	}
+
+	if strings.HasPrefix(update.Message.Text, "/currency_rate") {
+		cmdCurrencyRate(update, bot, db)
 		return
 	}
 
