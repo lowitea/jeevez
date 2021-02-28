@@ -56,10 +56,10 @@ func (stat *covidStat) GetMessage(data string, statName string) string {
 	msgTplString := "" +
 		"\U0001F9A0 <b>COVID-19 Статистика [{{ .StatName }}]</b>\n" +
 		"{{ .Data }}\n\n" +
-		"Подтверждённые: {{ .Stat.Confirmed }} (+{{ .Stat.ConfirmedDiff }})\n" +
-		"Смерти: {{ .Stat.Deaths }} (+{{ .Stat.DeathsDiff }})\n" +
-		"Выздоровевшие: {{ .Stat.Recovered }} (+{{ .Stat.RecoveredDiff }})\n" +
-		"Болеющие: {{ .Stat.Active }} (+{{ .Stat.ActiveDiff }})\n" +
+		"Подтверждённые: {{ .Stat.Confirmed }} (Δ{{ .Stat.ConfirmedDiff }})\n" +
+		"Смерти: {{ .Stat.Deaths }} (Δ{{ .Stat.DeathsDiff }})\n" +
+		"Выздоровевшие: {{ .Stat.Recovered }} (Δ{{ .Stat.RecoveredDiff }})\n" +
+		"Болеющие: {{ .Stat.Active }} (Δ{{ .Stat.ActiveDiff }})\n" +
 		"Летальность: {{ printf \"%.6f\" .Stat.FatalityRate }}\n\n" +
 		"https://yandex.ru/covid19/stat"
 
@@ -90,7 +90,7 @@ func getData(url string) (covidStat, error) {
 		return covidStat{}, err
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
