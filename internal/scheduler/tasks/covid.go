@@ -114,30 +114,28 @@ func getData(url string) (covidStat, error) {
 }
 
 // CovidTask таска рассылающая статистику по ковиду
-func CovidTask(bot *tgbotapi.BotAPI) func() {
-	return func() {
-		log.Printf("Covid task has started")
+func CovidTask(bot *tgbotapi.BotAPI) {
+	log.Printf("Covid task has started")
 
-		dt := time.Now().AddDate(0, 0, -1)
-		data := dt.Format("2006-01-02")
+	dt := time.Now().AddDate(0, 0, -1)
+	data := dt.Format("2006-01-02")
 
-		statUrls := map[string]string{
-			"Москва": "https://covid-api.com/api/reports?date=%s&iso=rus&region_province=Moscow",
-			"Россия": "https://covid-api.com/api/reports?date=%s&iso=rus",
+	statUrls := map[string]string{
+		"Москва": "https://covid-api.com/api/reports?date=%s&iso=rus&region_province=Moscow",
+		"Россия": "https://covid-api.com/api/reports?date=%s&iso=rus",
+	}
+
+	for statName, statUrl := range statUrls {
+		stat, err := getData(fmt.Sprintf(statUrl, data))
+		if err != nil {
+			log.Printf("Error get data: %s", err)
+			continue
 		}
+		msg := tgbotapi.NewMessage(159096094, stat.GetMessage(data, statName))
+		msg.ParseMode = "HTML"
+		msg.DisableNotification = true
+		msg.DisableWebPagePreview = true
 
-		for statName, statUrl := range statUrls {
-			stat, err := getData(fmt.Sprintf(statUrl, data))
-			if err != nil {
-				log.Printf("Error get data: %s", err)
-				continue
-			}
-			msg := tgbotapi.NewMessage(159096094, stat.GetMessage(data, statName))
-			msg.ParseMode = "HTML"
-			msg.DisableNotification = true
-			msg.DisableWebPagePreview = true
-
-			_, _ = bot.Send(msg)
-		}
+		_, _ = bot.Send(msg)
 	}
 }
