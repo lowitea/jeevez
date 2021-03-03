@@ -33,7 +33,6 @@ func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	msg.ReplyToMessageID = update.Message.MessageID
 	msg.ParseMode = "HTML"
 	_, _ = bot.Send(msg)
-	return
 }
 
 // parseTime парсит строку в формате 23:59 и возвращает секунды

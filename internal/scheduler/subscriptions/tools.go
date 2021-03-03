@@ -30,7 +30,7 @@ func Send(bot *tgbotapi.BotAPI, db *gorm.DB) {
 		}
 
 		sFunc, ok := SubscriptionFuncMap[subscr]
-		if ok != true {
+		if !ok {
 			log.Print("Subscription func not found error")
 			continue
 		}
