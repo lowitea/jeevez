@@ -25,16 +25,13 @@ func cmdHelp(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *config.Config) {
 		"/currency_rate USD_RUB - Можно и просто курс текущий доллара к " +
 		"рублю посмотреть например\n" +
 		"/currency_rate - А так команда без параметров покажет все " +
-		"доступные валютные пары)"
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
-	_, _ = bot.Send(msg)
-}
-
-func cmdStart(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *config.Config) {
-	msgText := "" +
-		"Приветствую! Я Ваш личный бот помощник. 🤵🏻\n" +
-		"Готов помогать всем, чем умею. Чтобы узнать, подробнее, " +
-		"предлагаю использовать команду /help :)"
+		"доступные валютные пары)" +
+		"\n\n" +
+		"Также я могу сообщать вам полезную информацию, в удобное для вас время," +
+		"только попросите:\n" +
+		"/subscriptions - так я выведу список всех тем, о которых могу рассказать.\n" +
+		"/subscribe covid19-moscow 11:00 - а так, вы можете задать интересующую Вас" +
+		"тему, и время, в которое я буду Вам писать :)"
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 	_, _ = bot.Send(msg)
 }
@@ -50,7 +47,6 @@ func BaseCommandHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, cfg *confi
 	cmdFuncMap := map[string]func(update tgbotapi.Update, bot *tgbotapi.BotAPI, cfg *config.Config){
 		"/version": cmdVersion,
 		"/help":    cmdHelp,
-		"/start":   cmdStart,
 	}
 
 	if cmdFunc, ok := cmdFuncMap[update.Message.Text]; ok {

@@ -8,6 +8,7 @@ import (
 	"github.com/lowitea/jeevez/internal/handlers"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/scheduler"
+	"github.com/lowitea/jeevez/internal/scheduler/subscriptions"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -32,13 +33,6 @@ func Run() {
 	log.Printf("Bot version: %s", cfg.App.Version)
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	// отправляем инфу о запуске
-	msg := tgbotapi.NewMessage(
-		cfg.Telegram.Admin,
-		"🤵🏻 Я обновился! :)\nМоя новая версия: "+cfg.App.Version,
-	)
-	_, _ = bot.Send(msg)
-
 	// инициализируем кеш (пока не нужен)
 	//cache, _ := bigcache.NewBigCache(bigcache.DefaultConfig(12 * time.Hour))
 
@@ -54,8 +48,14 @@ func Run() {
 	}
 
 	// миграция моделей
-	if err := db.AutoMigrate(&models.CurrencyRate{}); err != nil {
+	if err := models.MigrateAll(db); err != nil {
 		log.Printf("migrating error: %s", err)
+		os.Exit(1)
+	}
+
+	// инициализация вариантов подписок
+	if err := subscriptions.InitSubscriptions(db); err != nil {
+		log.Printf("subscriptions init error: %s", err)
 		os.Exit(1)
 	}
 
@@ -66,9 +66,18 @@ func Run() {
 	u.Timeout = 1
 	updates, _ := bot.GetUpdatesChan(u)
 
+	// отправляем инфу о запуске
+	msg := tgbotapi.NewMessage(
+		cfg.Telegram.Admin,
+		"🤵🏻 Я обновился! :)\nМоя новая версия: "+cfg.App.Version,
+	)
+	_, _ = bot.Send(msg)
+
 	// запуск обработки сообщений
 	for update := range updates {
+		go handlers.StartHandler(update, bot, db)
 		go handlers.BaseCommandHandler(update, bot, &cfg)
 		go handlers.CurrencyConverterHandler(update, bot, db)
+		go handlers.BaseSubscriptionsHandler(update, bot, db)
 	}
 }

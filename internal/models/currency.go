@@ -4,7 +4,7 @@ import "time"
 
 // CurrencyRate модель валютной пары
 type CurrencyRate struct {
-	ID        uint      `gorm:"primaryKey"`
+	ID        int64     `gorm:"primaryKey"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 	Value     float64
 	Name      string

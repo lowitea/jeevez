@@ -55,11 +55,11 @@ func getCurPair(firstCur string, secCur string) string {
 
 // cmdCurrencyRate команда /currency_rate показывает доступные пары валют или курс по конкретной паре
 func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
-	tokens := strings.Split(update.Message.Text, " ")
+	args := strings.Split(update.Message.Text, " ")
 	var msgText string
 
 	// команда пришла без параметров, отправляем список валют
-	if len(tokens) == 1 {
+	if len(args) == 1 {
 		var curRates []models.CurrencyRate
 		result := db.Find(&curRates)
 		if result.Error != nil {
@@ -85,7 +85,7 @@ func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 	}
 
 	// запросили конкретную валюту, пытаемся найти её в базе и отдаём результат
-	curPair := tokens[1]
+	curPair := args[1]
 	curRate, err := getCurrencyRate(db, curPair)
 
 	if err != nil {

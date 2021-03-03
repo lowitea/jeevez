@@ -1,8 +1,9 @@
-package tasks
+package subscriptions
 
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"io/ioutil"
@@ -56,10 +57,14 @@ func (stat *covidStat) GetMessage(data string, statName string) string {
 	msgTplString := "" +
 		"\U0001F9A0 <b>COVID-19 Статистика [{{ .StatName }}]</b>\n" +
 		"{{ .Data }}\n\n" +
-		"Подтверждённые: {{ .Stat.Confirmed }} (Δ{{ .Stat.ConfirmedDiff }})\n" +
-		"Смерти: {{ .Stat.Deaths }} (Δ{{ .Stat.DeathsDiff }})\n" +
-		"Выздоровевшие: {{ .Stat.Recovered }} (Δ{{ .Stat.RecoveredDiff }})\n" +
-		"Болеющие: {{ .Stat.Active }} (Δ{{ .Stat.ActiveDiff }})\n" +
+		"Подтверждённые: {{ .Stat.Confirmed }} " +
+		"({{if gt .Stat.ConfirmedDiff 0}}+{{end}}{{ .Stat.ConfirmedDiff }})\n" +
+		"Смерти: {{ .Stat.Deaths }} " +
+		"({{if gt .Stat.DeathsDiff 0}}+{{end}}{{ .Stat.DeathsDiff }})\n" +
+		"Выздоровевшие: {{ .Stat.Recovered }} " +
+		"({{if gt .Stat.RecoveredDiff 0}}+{{end}}{{ .Stat.RecoveredDiff }})\n" +
+		"Болеющие: {{ .Stat.Active }} " +
+		"({{if gt .Stat.ActiveDiff 0}}+{{end}}{{ .Stat.ActiveDiff }})\n" +
 		"Летальность: {{ printf \"%.6f\" .Stat.FatalityRate }}\n\n" +
 		"https://yandex.ru/covid19/stat"
 
@@ -81,13 +86,13 @@ type apiResp struct {
 	Data []covidStat
 }
 
-// получения статистики с апи
-func getData(url string) (covidStat, error) {
-
+// getRawData получение сырых данных из апи
+func getRawData(url string) ([]byte, error) {
 	resp, err := http.Get(url)
+
 	if err != nil {
 		log.Printf("Error get data: %s", err)
-		return covidStat{}, err
+		return nil, err
 	}
 
 	defer func() { _ = resp.Body.Close() }()
@@ -95,13 +100,24 @@ func getData(url string) (covidStat, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
-		return covidStat{}, err
+		return nil, err
+	}
+	return body, nil
+}
+
+// getData получения статистики с апи
+func getData(url string) (*covidStat, string, error) {
+
+	dt := time.Now().AddDate(0, 0, -1).Format("2006-01-02")
+	rawData, err := getRawData(fmt.Sprintf(url, dt))
+	if err != nil {
+		return nil, "", err
 	}
 
 	var data apiResp
-	if err := json.Unmarshal(body, &data); err != nil {
+	if err := json.Unmarshal(rawData, &data); err != nil {
 		log.Printf("Error get data: %s", err)
-		return covidStat{}, err
+		return nil, "", err
 	}
 
 	var result covidStat
@@ -110,15 +126,35 @@ func getData(url string) (covidStat, error) {
 		result.Update(stat)
 	}
 
-	return result, nil
+	if result.Confirmed != 0 {
+		return &result, dt, nil
+	}
+
+	dt = time.Now().AddDate(0, 0, -2).Format("2006-01-02")
+	rawData, err = getRawData(fmt.Sprintf(url, dt))
+	if err != nil {
+		return nil, "", err
+	}
+
+	if err := json.Unmarshal(rawData, &data); err != nil {
+		log.Printf("Error get data: %s", err)
+		return nil, "", err
+	}
+
+	for _, stat := range data.Data {
+		result.Update(stat)
+	}
+
+	if result.Confirmed == 0 {
+		return nil, "", errors.New("covid api returned empty result")
+	}
+
+	return &result, dt, nil
 }
 
 // CovidTask таска рассылающая статистику по ковиду
 func CovidTask(bot *tgbotapi.BotAPI) {
-	log.Printf("CovidTask has started")
-
-	dt := time.Now().AddDate(0, 0, -1)
-	data := dt.Format("2006-01-02")
+	log.Printf("Covid task has started")
 
 	statUrls := map[string]string{
 		"Москва": "https://covid-api.com/api/reports?date=%s&iso=rus&region_province=Moscow",
@@ -126,7 +162,7 @@ func CovidTask(bot *tgbotapi.BotAPI) {
 	}
 
 	for statName, statUrl := range statUrls {
-		stat, err := getData(fmt.Sprintf(statUrl, data))
+		stat, data, err := getData(statUrl)
 		if err != nil {
 			log.Printf("Error get data: %s", err)
 			continue
