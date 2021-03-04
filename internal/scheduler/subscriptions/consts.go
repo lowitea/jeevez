@@ -3,9 +3,10 @@ package subscriptions
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
+	"gorm.io/gorm"
 )
 
-var SubscriptionFuncMap = map[models.Subscription]func(bot *tgbotapi.BotAPI, subscr models.Subscription){
+var SubscriptionFuncMap = map[models.Subscription]func(bot *tgbotapi.BotAPI, db *gorm.DB, subscr models.Subscription){
 	{
 		ID:          1,
 		Name:        "covid19-russia",

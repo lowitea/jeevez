@@ -34,7 +34,7 @@ func Send(bot *tgbotapi.BotAPI, db *gorm.DB) {
 			log.Print("Subscription func not found error")
 			continue
 		}
-		sFunc(bot, subscr)
+		sFunc(bot, db, subscr)
 	}
 }
 
