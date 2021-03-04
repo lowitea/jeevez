@@ -5,7 +5,7 @@ import (
 	"github.com/lowitea/jeevez/internal/models"
 )
 
-var SubscriptionFuncMap = map[models.Subscription]func(bot *tgbotapi.BotAPI){
+var SubscriptionFuncMap = map[models.Subscription]func(bot *tgbotapi.BotAPI, subscr models.Subscription){
 	{
 		ID:          1,
 		Name:        "covid19-russia",

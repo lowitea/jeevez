@@ -20,7 +20,7 @@ func StartHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 		log.Printf("create User error: %s", result.Error)
 		msgText = msgText +
 			"К сожалению, не получилось Вас зарегистрировать," +
-			"попробуйте пожалуйста позже, с помощью команды /start :)"
+			"попробуйте пожалуйста позже, с помощью команды /start ):"
 	} else {
 		msgText = msgText +
 			"Готов помогать всем, чем умею. Чтобы узнать, подробнее, " +

@@ -14,10 +14,10 @@ type Subscription struct {
 
 // ChatSubscription модель связи чата с подписками
 type ChatSubscription struct {
-	ChatID         int64 `gorm:"primaryKey"`
-	SubscriptionID int64 `gorm:"primaryKey"`
-	CreatedAt      time.Time
-	Time           int64 `gorm:"index"`
+	ChatID         int64     `gorm:"primaryKey"`
+	SubscriptionID int64     `gorm:"primaryKey"`
+	CreatedAt      time.Time `gorm:"autoUpdateTime"`
+	Time           int64     `gorm:"index"`
 }
 
 func (ChatSubscription) BeforeCreate(db *gorm.DB) error {

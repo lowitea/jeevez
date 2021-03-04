@@ -1,28 +1,28 @@
 package tasks
 
 import (
-	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/lowitea/jeevez/internal/models"
+	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"text/template"
 	"time"
 )
 
 // covidStat структура с ответом от апи статистки по ковиду
 type covidStat struct {
-	Confirmed     int     `json:"confirmed"`
-	Deaths        int     `json:"deaths"`
-	Recovered     int     `json:"recovered"`
-	ConfirmedDiff int     `json:"confirmed_diff"`
-	DeathsDiff    int     `json:"deaths_diff"`
-	RecoveredDiff int     `json:"recovered_diff"`
+	Confirmed     int64   `json:"confirmed"`
+	Deaths        int64   `json:"deaths"`
+	Recovered     int64   `json:"recovered"`
+	ConfirmedDiff int64   `json:"confirmed_diff"`
+	DeathsDiff    int64   `json:"deaths_diff"`
+	RecoveredDiff int64   `json:"recovered_diff"`
 	LastUpdate    string  `json:"last_update"`
-	Active        int     `json:"active"`
-	ActiveDiff    int     `json:"active_diff"`
+	Active        int64   `json:"active"`
+	ActiveDiff    int64   `json:"active_diff"`
 	FatalityRate  float64 `json:"fatality_rate"`
 }
 
@@ -45,49 +45,17 @@ func (stat *covidStat) Update(updStat covidStat) *covidStat {
 	return stat
 }
 
-// GetMessage вернуть строку для отправки в мессенджер
-func (stat *covidStat) GetMessage(data string, statName string) string {
-	type Ctx struct {
-		Stat     *covidStat
-		Data     string
-		StatName string
+// getData получить список данных по ковид из апи
+func getData(url string) ([]covidStat, error) {
+	// apiResp ответ от апи статистики
+	type apiResp struct {
+		Data []covidStat
 	}
-
-	msgTplString := "" +
-		"\U0001F9A0 <b>COVID-19 Статистика [{{ .StatName }}]</b>\n" +
-		"{{ .Data }}\n\n" +
-		"Подтверждённые: {{ .Stat.Confirmed }} (Δ{{ .Stat.ConfirmedDiff }})\n" +
-		"Смерти: {{ .Stat.Deaths }} (Δ{{ .Stat.DeathsDiff }})\n" +
-		"Выздоровевшие: {{ .Stat.Recovered }} (Δ{{ .Stat.RecoveredDiff }})\n" +
-		"Болеющие: {{ .Stat.Active }} (Δ{{ .Stat.ActiveDiff }})\n" +
-		"Летальность: {{ printf \"%.6f\" .Stat.FatalityRate }}\n\n" +
-		"https://yandex.ru/covid19/stat"
-
-	msgTpl := template.Must(
-		template.New("msgTpl").Parse(msgTplString))
-
-	ctx := Ctx{stat, data, statName}
-
-	msg := bytes.Buffer{}
-	if err := msgTpl.Execute(&msg, ctx); err != nil {
-		panic(err)
-	}
-
-	return msg.String()
-}
-
-// apiResp ответ от апи статистики
-type apiResp struct {
-	Data []covidStat
-}
-
-// получения статистики с апи
-func getData(url string) (covidStat, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
-		return covidStat{}, err
+		return nil, err
 	}
 
 	defer func() { _ = resp.Body.Close() }()
@@ -95,47 +63,86 @@ func getData(url string) (covidStat, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
-		return covidStat{}, err
+		return nil, err
 	}
 
 	var data apiResp
 	if err := json.Unmarshal(body, &data); err != nil {
 		log.Printf("Error get data: %s", err)
-		return covidStat{}, err
+		return nil, err
+	}
+	return data.Data, nil
+}
+
+// getStat получения статистики по ссылке
+func getStat(url string) (*covidStat, error) {
+	// запрашиваем статистику по ковиду, сначала за вчера, но если не получилось, то за позавчера
+	var stats []covidStat
+	for _, day := range [...]int{-1, -2} {
+		dt := time.Now().AddDate(0, 0, day).Format("2006-01-02")
+		var err error
+		stats, err = getData(fmt.Sprintf(url, dt))
+		if err != nil {
+			return nil, fmt.Errorf("getting covid stats error: %s", err)
+		}
+		if len(stats) != 0 {
+			break
+		}
+	}
+
+	if stats == nil {
+		return nil, errors.New("getting covid stats error")
 	}
 
 	var result covidStat
-
-	for _, stat := range data.Data {
+	for _, stat := range stats {
 		result.Update(stat)
 	}
 
-	return result, nil
+	return &result, nil
 }
 
 // CovidTask таска рассылающая статистику по ковиду
-func CovidTask(bot *tgbotapi.BotAPI) {
+func CovidTask(db *gorm.DB) {
 	log.Printf("CovidTask has started")
 
-	dt := time.Now().AddDate(0, 0, -1)
-	data := dt.Format("2006-01-02")
-
-	statUrls := map[string]string{
-		"Москва": "https://covid-api.com/api/reports?date=%s&iso=rus&region_province=Moscow",
-		"Россия": "https://covid-api.com/api/reports?date=%s&iso=rus",
-	}
-
-	for statName, statUrl := range statUrls {
-		stat, err := getData(fmt.Sprintf(statUrl, data))
+	for statName, statConf := range subscrUrlMap {
+		respStat, err := getStat(statConf.UrlTpl)
 		if err != nil {
 			log.Printf("Error get data: %s", err)
 			continue
 		}
-		msg := tgbotapi.NewMessage(159096094, stat.GetMessage(data, statName))
-		msg.ParseMode = "HTML"
-		msg.DisableNotification = true
-		msg.DisableWebPagePreview = true
 
-		_, _ = bot.Send(msg)
+		stat := models.CovidStat{
+			SubscriptionName: statName,
+			HumanName:        statConf.HumanName,
+			Confirmed:        respStat.Confirmed,
+			Deaths:           respStat.Deaths,
+			Recovered:        respStat.Recovered,
+			ConfirmedDiff:    respStat.ConfirmedDiff,
+			DeathsDiff:       respStat.DeathsDiff,
+			RecoveredDiff:    respStat.RecoveredDiff,
+			LastUpdate:       respStat.LastUpdate,
+			Active:           respStat.Active,
+			ActiveDiff:       respStat.ActiveDiff,
+			FatalityRate:     respStat.FatalityRate,
+		}
+
+		// создаём или обновляем статистику по ковиду
+		var statDB models.CovidStat
+		result := db.First(&statDB, "subscription_name = ?", statName)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			if result := db.Create(&stat); result.Error != nil {
+				log.Printf("create CovidStat error: %s", result.Error)
+			}
+		} else if result.Error != nil {
+			log.Printf("getting CovidStat from db error: %s", result.Error)
+			return
+		} else {
+			stat.ID = statDB.ID
+			if result := db.Save(&stat); result.Error != nil {
+				log.Printf("update CovidStat error: %s", result.Error)
+			}
+		}
 	}
 }

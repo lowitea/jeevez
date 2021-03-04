@@ -34,12 +34,13 @@ func Send(bot *tgbotapi.BotAPI, db *gorm.DB) {
 			log.Print("Subscription func not found error")
 			continue
 		}
-		sFunc(bot)
+		sFunc(bot, subscr)
 	}
 }
 
 // InitSubscriptions создаёт в базе недостающие подписки
 func InitSubscriptions(db *gorm.DB) error {
+	log.Print("InitSubscriptions has started")
 	for subscr := range SubscriptionFuncMap {
 		// пытаемся получить подписку из базы по id и name
 		subscrDB := models.Subscription{}
@@ -67,6 +68,5 @@ func InitSubscriptions(db *gorm.DB) error {
 			db.Save(&subscr)
 		}
 	}
-	log.Print("Subscriptions initialized")
 	return nil
 }

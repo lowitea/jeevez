@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/lowitea/jeevez/internal/models"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -153,7 +154,7 @@ func getData(url string) (*covidStat, string, error) {
 }
 
 // CovidTask таска рассылающая статистику по ковиду
-func CovidTask(bot *tgbotapi.BotAPI) {
+func CovidTask(bot *tgbotapi.BotAPI, _ models.Subscription) {
 	log.Printf("Covid task has started")
 
 	statUrls := map[string]string{
