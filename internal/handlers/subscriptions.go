@@ -15,7 +15,7 @@ import (
 )
 
 // cmdSubscriptions выводит список всех доступных подписок
-func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	var msgTextB bytes.Buffer
 	msgTextB.WriteString("Все доступные темы для подписки:\n\n")
 
@@ -27,7 +27,29 @@ func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		msgTextB.WriteString("\n")
 	}
 
-	msgTextB.WriteString("\nПример команды для подписки:\n/subscribe covid19-russia 11:00")
+	msgTextB.WriteString("\nПример команды для подписки:\n/subscribe covid19-russia 11:00\n\n")
+
+	var chat models.Chat
+	db.First(&chat, "tg_id = ?", update.Message.Chat.ID)
+
+	var chatSubscrs []models.ChatSubscription
+	db.Find(&chatSubscrs, "chat_id = ?", chat.ID)
+
+	if len(chatSubscrs) > 0 {
+		msgTextB.WriteString("\nТемы на которые Вы подписаны:\n")
+	}
+
+	for _, chatSubscr := range chatSubscrs {
+		var subscr models.Subscription
+		if result := db.First(&subscr, chatSubscr.SubscriptionID); result.Error != nil {
+			continue
+		}
+		msgTextB.WriteString("\n")
+		msgTextB.WriteString("<b>")
+		msgTextB.WriteString(subscr.Name)
+		msgTextB.WriteString("</b> - ")
+		msgTextB.WriteString(subscr.Description)
+	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgTextB.String())
 	msg.ReplyToMessageID = update.Message.MessageID
@@ -211,7 +233,7 @@ func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 // BaseSubscriptionsHandler обработчик для команд подписок
 func BaseSubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if update.Message.Text == "/subscriptions" {
-		cmdSubscriptions(update, bot)
+		cmdSubscriptions(update, bot, db)
 	}
 	if strings.HasPrefix(update.Message.Text, "/subscribe") {
 		cmdSubscribe(update, bot, db)

@@ -31,7 +31,8 @@ func cmdHelp(update tgbotapi.Update, bot *tgbotapi.BotAPI, _ *config.Config) {
 		"только попросите:\n" +
 		"/subscriptions - так я выведу список всех тем, о которых могу рассказать.\n" +
 		"/subscribe covid19-moscow 11:00 - а так, вы можете задать интересующую Вас" +
-		"тему, и время, в которое я буду Вам писать :)"
+		"тему, и время, в которое я буду Вам писать :)" +
+		"/unsubscribe - так Вы сможете отменить подписку."
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 	_, _ = bot.Send(msg)
 }
