@@ -153,6 +153,61 @@ func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	_, _ = bot.Send(msg)
 }
 
+// cmdUnsubscribe отписывает пользователя
+func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+	args := strings.Split(update.Message.Text, " ")
+
+	if len(args) != 2 {
+		msg := tgbotapi.NewMessage(
+			update.Message.Chat.ID,
+			"Чтобы отписаться от темы, отправьте команду в формате:\n"+
+				"/unsubscribe название_темы\n"+
+				"Например, так:\n"+
+				"/unsubscribe covid19-russia",
+		)
+		msg.ReplyToMessageID = update.Message.MessageID
+		_, _ = bot.Send(msg)
+		return
+	}
+
+	subscrName := args[1]
+
+	var chat models.Chat
+	db.First(&chat, "tg_id = ?", update.Message.Chat.ID)
+
+	var subscr models.Subscription
+	db.First(&subscr, "name = ?", subscrName)
+
+	var chatSubscr models.ChatSubscription
+	result := db.First(&chatSubscr, "chat_id = ? AND subscription_id = ?", chat.ID, subscr.ID)
+	if result.Error != nil {
+		msg := tgbotapi.NewMessage(
+			update.Message.Chat.ID,
+			fmt.Sprintf("Не нашёл в своих записях информации, что Вы подписаны по тему %s :(", subscrName),
+		)
+		msg.ReplyToMessageID = update.Message.MessageID
+		_, _ = bot.Send(msg)
+		return
+	}
+	if result := db.Delete(&chatSubscr); result.Error != nil {
+		msg := tgbotapi.NewMessage(
+			update.Message.Chat.ID,
+			"Произошёл пожар в картотеке, не смог откорректировать свои записи :(\n"+
+				"Попробуйте, пожалуйста, позднее.",
+		)
+		msg.ReplyToMessageID = update.Message.MessageID
+		_, _ = bot.Send(msg)
+		return
+	}
+
+	msg := tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		fmt.Sprintf("Успешно отписал Вас от темы с именем %s\nНа здоровье)", subscrName),
+	)
+	msg.ReplyToMessageID = update.Message.MessageID
+	_, _ = bot.Send(msg)
+}
+
 // BaseSubscriptionsHandler обработчик для команд подписок
 func BaseSubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if update.Message.Text == "/subscriptions" {
@@ -160,5 +215,8 @@ func BaseSubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *
 	}
 	if strings.HasPrefix(update.Message.Text, "/subscribe") {
 		cmdSubscribe(update, bot, db)
+	}
+	if strings.HasPrefix(update.Message.Text, "/unsubscribe") {
+		cmdUnsubscribe(update, bot, db)
 	}
 }
