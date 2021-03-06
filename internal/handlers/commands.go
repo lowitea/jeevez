@@ -32,12 +32,21 @@ func cmdHelp(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		"Также я могу сообщать вам полезную информацию, в удобное для вас время," +
 		"только попросите:\n" +
 		"/subscriptions - так я выведу список всех тем, о которых могу рассказать.\n" +
-		"/subscribe covid19-moscow 11:00 - а так, вы можете задать интересующую Вас" +
-		"тему, и время, в которое я буду Вам писать :)" +
-		"/unsubscribe - так Вы сможете отменить подписку" +
+		"/subscribe covid19-moscow 11:00 - а так, можно задать интересующую Вас" +
+		"тему, и время, в которое я буду Вам писать :)\n" +
+		"/unsubscribe - так Вы сможете отменить подписку\n" +
 		"/subscription covid19-moscow - с помощью этой команды можно получить сегодняшнею информацию, " +
-		"без подписки на рассылку."
+		"без подписки на рассылку\n" +
+		"/roll - а так я скажу Вам случайное число от 0 до 100"
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+	_, _ = bot.Send(msg)
+}
+
+// cmdRoll выкидывает случайное число от 0 до 100
+func cmdRoll(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
+	num := rand.Intn(101)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, strconv.Itoa(num))
+	msg.ReplyToMessageID = update.Message.MessageID
 	_, _ = bot.Send(msg)
 }
 
@@ -52,6 +61,7 @@ func BaseCommandHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	cmdFuncMap := map[string]func(update tgbotapi.Update, bot *tgbotapi.BotAPI){
 		"/version": cmdVersion,
 		"/help":    cmdHelp,
+		"/roll":    cmdRoll,
 	}
 
 	if cmdFunc, ok := cmdFuncMap[update.Message.Text]; ok {
