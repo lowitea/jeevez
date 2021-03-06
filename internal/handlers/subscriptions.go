@@ -230,6 +230,40 @@ func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	_, _ = bot.Send(msg)
 }
 
+// cmdSubscription возвращает данные по подписке, без подписки
+func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+	args := strings.Split(update.Message.Text, " ")
+
+	if len(args) != 2 {
+		msg := tgbotapi.NewMessage(
+			update.Message.Chat.ID,
+			"Чтобы получить информацию по теме, отправьте команду в формате:\n"+
+				"/subscription название_темы\n"+
+				"Например, так:\n"+
+				"/subscription covid19-russia",
+		)
+		msg.ReplyToMessageID = update.Message.MessageID
+		_, _ = bot.Send(msg)
+		return
+	}
+
+	subscrName := args[1]
+
+	for subscr, sFunc := range subscriptions.SubscriptionFuncMap {
+		if subscr.Name == subscrName {
+			sFunc(bot, db, subscr)
+			return
+		}
+	}
+
+	msg := tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		"К сожалению, мне не удалось найти в своих записях такую тему :(",
+	)
+	msg.ReplyToMessageID = update.Message.MessageID
+	_, _ = bot.Send(msg)
+}
+
 // BaseSubscriptionsHandler обработчик для команд подписок
 func BaseSubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if update.Message.Text == "/subscriptions" {
@@ -240,5 +274,8 @@ func BaseSubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *
 	}
 	if strings.HasPrefix(update.Message.Text, "/unsubscribe") {
 		cmdUnsubscribe(update, bot, db)
+	}
+	if strings.HasPrefix(update.Message.Text, "/subscription") {
+		cmdSubscription(update, bot, db)
 	}
 }
