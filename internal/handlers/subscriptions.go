@@ -268,14 +268,11 @@ func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 func BaseSubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if update.Message.Text == "/subscriptions" {
 		cmdSubscriptions(update, bot, db)
-	}
-	if strings.HasPrefix(update.Message.Text, "/subscribe") {
+	} else if strings.HasPrefix(update.Message.Text, "/subscribe") {
 		cmdSubscribe(update, bot, db)
-	}
-	if strings.HasPrefix(update.Message.Text, "/unsubscribe") {
+	} else if strings.HasPrefix(update.Message.Text, "/unsubscribe") {
 		cmdUnsubscribe(update, bot, db)
-	}
-	if strings.HasPrefix(update.Message.Text, "/subscription") {
+	} else if strings.HasPrefix(update.Message.Text, "/subscription") {
 		cmdSubscription(update, bot, db)
 	}
 }
