@@ -1,5 +1,9 @@
 package config
 
+import (
+	"github.com/kelseyhightower/envconfig"
+)
+
 type Config struct {
 	App struct {
 		Version string `default:"x.x.x (dev)"`
@@ -18,4 +22,13 @@ type Config struct {
 	CurrencyAPI struct {
 		Token string `required:"true"`
 	}
+}
+
+var Cfg Config
+
+func InitConfig() (*Config, error) {
+	if err := envconfig.Process("jeevez", &Cfg); err != nil {
+		return nil, err
+	}
+	return &Cfg, nil
 }

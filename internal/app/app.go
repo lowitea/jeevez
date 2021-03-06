@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/handlers"
 	"github.com/lowitea/jeevez/internal/models"
@@ -18,9 +17,8 @@ import (
 // Run функция запускающая бот
 func Run() {
 	// инициализируем конфиг
-	cfg := config.Config{}
-
-	if err := envconfig.Process("jeevez", &cfg); err != nil {
+	cfg, err := config.InitConfig()
+	if err != nil {
 		log.Printf("env parse error %s", err)
 		os.Exit(1)
 	}
@@ -60,7 +58,7 @@ func Run() {
 	}
 
 	// запуск фоновых задач
-	go scheduler.Run(bot, db, &cfg)
+	go scheduler.Run(bot, db)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 1
@@ -76,8 +74,9 @@ func Run() {
 	// запуск обработки сообщений
 	for update := range updates {
 		go handlers.StartHandler(update, bot, db)
-		go handlers.BaseCommandHandler(update, bot, &cfg)
+		go handlers.BaseCommandHandler(update, bot)
 		go handlers.CurrencyConverterHandler(update, bot, db)
-		go handlers.BaseSubscriptionsHandler(update, bot, db)
+		go handlers.SwitchHandler(update, bot)
+		go handlers.SubscriptionsHandler(update, bot, db)
 	}
 }
