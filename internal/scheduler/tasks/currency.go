@@ -3,6 +3,7 @@ package tasks
 import (
 	"errors"
 	"fmt"
+	"github.com/lowitea/jeevez/internal/app"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/models"
 	"gorm.io/gorm"
@@ -56,7 +57,7 @@ func getCurrencyRate(url string) (float64, error) {
 }
 
 // CurrencyTask таска обновляющая курсы валют в базе
-func CurrencyTask(db *gorm.DB, cfg *config.Config) {
+func CurrencyTask(db *gorm.DB) {
 	log.Printf("CurrencyTask has started")
 	baseUrl := url2.URL{
 		Scheme: config.CurrencyApiScheme,
@@ -67,7 +68,8 @@ func CurrencyTask(db *gorm.DB, cfg *config.Config) {
 	for _, curPair := range CurrencyPairs {
 
 		curUrl := baseUrl
-		curUrl.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, cfg.CurrencyAPI.Token)
+		token := app.Config.CurrencyAPI.Token
+		curUrl.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, token)
 
 		curRate, err := getCurrencyRate(curUrl.String())
 		if err != nil {

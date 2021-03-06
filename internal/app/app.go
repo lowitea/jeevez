@@ -15,22 +15,22 @@ import (
 	"os"
 )
 
+var Config config.Config
+
 // Run функция запускающая бот
 func Run() {
 	// инициализируем конфиг
-	cfg := config.Config{}
-
-	if err := envconfig.Process("jeevez", &cfg); err != nil {
+	if err := envconfig.Process("jeevez", &Config); err != nil {
 		log.Printf("env parse error %s", err)
 		os.Exit(1)
 	}
 
-	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
+	bot, err := tgbotapi.NewBotAPI(Config.Telegram.Token)
 	if err != nil {
 		log.Printf("error connect to telegram %s", err)
 		os.Exit(1)
 	}
-	log.Printf("Bot version: %s", cfg.App.Version)
+	log.Printf("Bot version: %s", Config.App.Version)
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	// инициализируем кеш (пока не нужен)
@@ -39,7 +39,7 @@ func Run() {
 	// инициализация базы
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d",
-		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.Port,
+		Config.DB.Host, Config.DB.User, Config.DB.Password, Config.DB.DBName, Config.DB.Port,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -60,7 +60,7 @@ func Run() {
 	}
 
 	// запуск фоновых задач
-	go scheduler.Run(bot, db, &cfg)
+	go scheduler.Run(bot, db)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 1
@@ -68,15 +68,15 @@ func Run() {
 
 	// отправляем инфу о запуске
 	msg := tgbotapi.NewMessage(
-		cfg.Telegram.Admin,
-		"🤵🏻 Я обновился! :)\nМоя новая версия: "+cfg.App.Version,
+		Config.Telegram.Admin,
+		"🤵🏻 Я обновился! :)\nМоя новая версия: "+Config.App.Version,
 	)
 	_, _ = bot.Send(msg)
 
 	// запуск обработки сообщений
 	for update := range updates {
 		go handlers.StartHandler(update, bot, db)
-		go handlers.BaseCommandHandler(update, bot, &cfg)
+		go handlers.BaseCommandHandler(update, bot)
 		go handlers.CurrencyConverterHandler(update, bot, db)
 		go handlers.BaseSubscriptionsHandler(update, bot, db)
 	}
