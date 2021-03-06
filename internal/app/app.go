@@ -76,6 +76,7 @@ func Run() {
 		go handlers.StartHandler(update, bot, db)
 		go handlers.BaseCommandHandler(update, bot)
 		go handlers.CurrencyConverterHandler(update, bot, db)
-		go handlers.BaseSubscriptionsHandler(update, bot, db)
+		go handlers.SwitchHandler(update, bot)
+		go handlers.SubscriptionsHandler(update, bot, db)
 	}
 }

@@ -264,8 +264,8 @@ func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 	_, _ = bot.Send(msg)
 }
 
-// BaseSubscriptionsHandler обработчик для команд подписок
-func BaseSubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+// SubscriptionsHandler обработчик для команд подписок
+func SubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if update.Message.Text == "/subscriptions" {
 		cmdSubscriptions(update, bot, db)
 	} else if strings.HasPrefix(update.Message.Text, "/subscribe") {
