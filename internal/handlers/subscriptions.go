@@ -160,7 +160,7 @@ func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if result := clauses.Create(&chatSubscr); result.Error != nil {
 		log.Printf("create ChatSubscription error: %s", result.Error)
 		msgText = msgText +
-			"К сожалению, не получилось Вас подписать на тему," +
+			"К сожалению, не получилось Вас подписать на тему, " +
 			"попробуйте пожалуйста позже ):"
 	} else {
 		msgText = msgText + fmt.Sprintf(
