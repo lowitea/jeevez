@@ -56,39 +56,38 @@ func getCurrencyRate(url string) (float64, error) {
 }
 
 // CurrencyTask таска обновляющая курсы валют в базе
-func CurrencyTask(db *gorm.DB, cfg *config.Config) func() {
+func CurrencyTask(db *gorm.DB, cfg *config.Config) {
+	log.Printf("CurrencyTask has started")
 	baseUrl := url2.URL{
 		Scheme: config.CurrencyApiScheme,
 		Host:   config.CurrencyApiHost,
 		Path:   config.CurrencyApiPath,
 	}
 
-	return func() {
-		for _, curPair := range CurrencyPairs {
+	for _, curPair := range CurrencyPairs {
 
-			curUrl := baseUrl
-			curUrl.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, cfg.CurrencyAPI.Token)
+		curUrl := baseUrl
+		curUrl.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, cfg.CurrencyAPI.Token)
 
-			curRate, err := getCurrencyRate(curUrl.String())
-			if err != nil {
-				log.Printf("getting currency rate error: %s", err)
-				return
-			}
-
-			// получаем валюту из базы, или создаём новую, если не нашли
-			var currencyRate models.CurrencyRate
-			result := db.First(&currencyRate, "name = ?", curPair)
-			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-				currencyRate = models.CurrencyRate{Name: curPair}
-				_ = db.Create(&currencyRate)
-			} else if result.Error != nil {
-				log.Printf("getting currency from db error: %s", result.Error)
-				return
-			}
-
-			// обновляем данные в базе
-			currencyRate.Value = curRate
-			db.Save(&currencyRate)
+		curRate, err := getCurrencyRate(curUrl.String())
+		if err != nil {
+			log.Printf("getting currency rate error: %s", err)
+			return
 		}
+
+		// получаем валюту из базы, или создаём новую, если не нашли
+		var currencyRate models.CurrencyRate
+		result := db.First(&currencyRate, "name = ?", curPair)
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			currencyRate = models.CurrencyRate{Name: curPair}
+			_ = db.Create(&currencyRate)
+		} else if result.Error != nil {
+			log.Printf("getting currency from db error: %s", result.Error)
+			return
+		}
+
+		// обновляем данные в базе
+		currencyRate.Value = curRate
+		db.Save(&currencyRate)
 	}
 }
