@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/lowitea/jeevez/internal/app"
+	"github.com/lowitea/jeevez/internal/config"
+	"math/rand"
+	"strconv"
 )
 
 // cmdVersion вывод версии бота
 func cmdVersion(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, app.Config.App.Version)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, config.Cfg.App.Version)
 	_, _ = bot.Send(msg)
 }
 

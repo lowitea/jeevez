@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/kelseyhightower/envconfig"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/handlers"
 	"github.com/lowitea/jeevez/internal/models"
@@ -15,22 +14,21 @@ import (
 	"os"
 )
 
-var Config config.Config
-
 // Run функция запускающая бот
 func Run() {
 	// инициализируем конфиг
-	if err := envconfig.Process("jeevez", &Config); err != nil {
+	cfg, err := config.InitConfig()
+	if err != nil {
 		log.Printf("env parse error %s", err)
 		os.Exit(1)
 	}
 
-	bot, err := tgbotapi.NewBotAPI(Config.Telegram.Token)
+	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
 	if err != nil {
 		log.Printf("error connect to telegram %s", err)
 		os.Exit(1)
 	}
-	log.Printf("Bot version: %s", Config.App.Version)
+	log.Printf("Bot version: %s", cfg.App.Version)
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	// инициализируем кеш (пока не нужен)
@@ -39,7 +37,7 @@ func Run() {
 	// инициализация базы
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d",
-		Config.DB.Host, Config.DB.User, Config.DB.Password, Config.DB.DBName, Config.DB.Port,
+		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.Port,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -68,8 +66,8 @@ func Run() {
 
 	// отправляем инфу о запуске
 	msg := tgbotapi.NewMessage(
-		Config.Telegram.Admin,
-		"🤵🏻 Я обновился! :)\nМоя новая версия: "+Config.App.Version,
+		cfg.Telegram.Admin,
+		"🤵🏻 Я обновился! :)\nМоя новая версия: "+cfg.App.Version,
 	)
 	_, _ = bot.Send(msg)
 

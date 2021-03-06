@@ -3,7 +3,6 @@ package tasks
 import (
 	"errors"
 	"fmt"
-	"github.com/lowitea/jeevez/internal/app"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/models"
 	"gorm.io/gorm"
@@ -68,7 +67,7 @@ func CurrencyTask(db *gorm.DB) {
 	for _, curPair := range CurrencyPairs {
 
 		curUrl := baseUrl
-		token := app.Config.CurrencyAPI.Token
+		token := config.Cfg.CurrencyAPI.Token
 		curUrl.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, token)
 
 		curRate, err := getCurrencyRate(curUrl.String())
