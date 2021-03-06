@@ -68,12 +68,4 @@ func BaseCommandHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		cmdFunc(update, bot)
 		return
 	}
-
-	// если не нашли подходящей команды
-	msg := tgbotapi.NewMessage(
-		update.Message.Chat.ID,
-		"Такой команды я не знаю ¯\\_(ツ)_/¯",
-	)
-	msg.ReplyToMessageID = update.Message.MessageID
-	_, _ = bot.Send(msg)
 }
