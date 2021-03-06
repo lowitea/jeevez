@@ -88,7 +88,10 @@ func getSwitchFunc(text string) func(letter string) string {
 
 // cmdSwitch меняет раскладку текста
 func SwitchHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	if !strings.HasPrefix(update.Message.Text, "/switch") {
+	isSwitchCommand := strings.HasPrefix(
+		update.Message.Text, "/switch") || strings.HasPrefix(update.Message.Text, ".ыцшеср")
+
+	if !isSwitchCommand {
 		return
 	}
 
