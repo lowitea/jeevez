@@ -105,6 +105,7 @@ func SwitchHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		)
 		msg.ReplyToMessageID = update.Message.MessageID
 		_, _ = bot.Send(msg)
+		return
 	}
 
 	text := tokens[1]
