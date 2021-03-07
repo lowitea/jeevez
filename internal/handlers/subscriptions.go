@@ -150,7 +150,7 @@ func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	var msgText string
 	clauses := db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "chat_id"}, {Name: "subscription_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"time", "created_at"}),
+		DoUpdates: clause.AssignmentColumns([]string{"time", "created_at", "human_time"}),
 	})
 	if result := clauses.Create(&chatSubscr); result.Error != nil {
 		log.Printf("create ChatSubscription error: %s", result.Error)
