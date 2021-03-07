@@ -12,7 +12,9 @@ import (
 // Send отправляет сообщения по всем подпискам
 func Send(bot *tgbotapi.BotAPI, db *gorm.DB) {
 	log.Printf("Start send subscriptions")
-	now := time.Now()
+
+	loc, _ := time.LoadLocation("Europe/Moscow")
+	now := time.Now().In(loc)
 
 	roundedMinMinutes := now.Minute() / 10 * 10
 	minTime := now.Hour()*3600 + roundedMinMinutes*60

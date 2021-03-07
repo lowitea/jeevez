@@ -79,7 +79,8 @@ func getStat(url string) (*covidStat, error) {
 	// запрашиваем статистику по ковиду, сначала за вчера, но если не получилось, то за позавчера
 	var stats []covidStat
 	for _, day := range [...]int{-1, -2} {
-		dt := time.Now().AddDate(0, 0, day).Format("2006-01-02")
+		loc, _ := time.LoadLocation("Europe/Moscow")
+		dt := time.Now().AddDate(0, 0, day).In(loc).Format("2006-01-02")
 		var err error
 		stats, err = getData(fmt.Sprintf(url, dt))
 		if err != nil {
