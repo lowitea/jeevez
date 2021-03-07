@@ -36,7 +36,7 @@ func cmdHelp(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		"тему, и время, в которое я буду Вам писать :)\n" +
 		"/unsubscribe - так Вы сможете отменить подписку\n" +
 		"/subscription covid19-moscow - с помощью этой команды можно получить сегодняшнею информацию, " +
-		"без подписки на рассылку\n" +
+		"без подписки на рассылку\n\n" +
 		"/roll - а так я скажу Вам случайное число от 0 до 100\n" +
 		"/switch L;bdbc - cfvsq kexibq ,jn!) - могу и текст Ваш починить)"
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)

@@ -44,9 +44,13 @@ func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB)
 		if result := db.First(&subscr, chatSubscr.SubscriptionID); result.Error != nil {
 			continue
 		}
+
 		msgTextB.WriteString("\n")
-		msgTextB.WriteString("<b>")
+		msgTextB.WriteString("- <b>")
 		msgTextB.WriteString(subscr.Name)
+		msgTextB.WriteString(" [")
+		msgTextB.WriteString(chatSubscr.HumanTime)
+		msgTextB.WriteString("]")
 		msgTextB.WriteString("</b> - ")
 		msgTextB.WriteString(subscr.Description)
 	}
@@ -95,7 +99,7 @@ func getSubscription(name string) (models.Subscription, error) {
 	return models.Subscription{}, errors.New("subscription not found")
 }
 
-// cmdSubscribe выводит список всех доступных подписок
+// cmdSubscribe подписывает чат на заданную рассылку
 func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
 
@@ -149,6 +153,7 @@ func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 		ChatID:         chat.ID,
 		SubscriptionID: subscr.ID,
 		Time:           subscrSeconds,
+		HumanTime:      subscrTime,
 	}
 
 	// Создаём объект связи чата с подпиской
@@ -205,9 +210,10 @@ func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if result.Error != nil {
 		msg := tgbotapi.NewMessage(
 			update.Message.Chat.ID,
-			fmt.Sprintf("Не нашёл в своих записях информации, что Вы подписаны по тему %s :(", subscrName),
+			fmt.Sprintf("Не нашёл в своих записях информации, что Вы подписаны по тему <b>%s</b> :(", subscrName),
 		)
 		msg.ReplyToMessageID = update.Message.MessageID
+		msg.ParseMode = "HTML"
 		_, _ = bot.Send(msg)
 		return
 	}
@@ -224,9 +230,10 @@ func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 
 	msg := tgbotapi.NewMessage(
 		update.Message.Chat.ID,
-		fmt.Sprintf("Успешно отписал Вас от темы с именем %s\nНа здоровье)", subscrName),
+		fmt.Sprintf("Успешно отписал Вас от темы с именем <b>%s</b>\nНа здоровье)", subscrName),
 	)
 	msg.ReplyToMessageID = update.Message.MessageID
+	msg.ParseMode = "HTML"
 	_, _ = bot.Send(msg)
 }
 
