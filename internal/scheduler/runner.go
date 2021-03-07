@@ -16,7 +16,7 @@ func Run(bot *tgbotapi.BotAPI, db *gorm.DB) {
 	s := gocron.NewScheduler()
 	loc, _ := time.LoadLocation("Europe/Moscow")
 
-	//таска на рассылку данных по ковид-19
+	// таска на рассылку данных по ковид-19
 	_ = s.Every(1).Day().At("10:00").Loc(loc).Do(func() { tasks.CovidTask(db) })
 
 	// таска на обновление курсов валют в базе
