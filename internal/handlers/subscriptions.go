@@ -89,16 +89,6 @@ func parseTime(timeStr string) (int64, error) {
 	return secs, nil
 }
 
-// getSubscription возвращает нужную подписку по имени
-func getSubscription(name string) (models.Subscription, error) {
-	for s := range subscriptions.SubscriptionFuncMap {
-		if s.Name == name {
-			return s, nil
-		}
-	}
-	return models.Subscription{}, errors.New("subscription not found")
-}
-
 // cmdSubscribe подписывает чат на заданную рассылку
 func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
@@ -120,10 +110,10 @@ func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 
 	// находим нужную подписку в мапе
 	var subscr models.Subscription
-	var err error
+	var ok bool
 
 	// если не нашли, отправляем сообщение и выходим
-	if subscr, err = getSubscription(subscrName); err != nil {
+	if subscr, ok = subscriptions.SubscrNameSubscrMap[subscrName]; !ok {
 		msg := tgbotapi.NewMessage(
 			update.Message.Chat.ID,
 			"К сожалению, такой темы не существует(\n"+
@@ -256,11 +246,10 @@ func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 
 	subscrName := args[1]
 
-	for subscr, sFunc := range subscriptions.SubscriptionFuncMap {
-		if subscr.Name == subscrName {
-			sFunc(bot, db, subscr)
-			return
-		}
+	if subscr, ok := subscriptions.SubscrNameSubscrMap[subscrName]; ok {
+		sFunc := subscriptions.SubscriptionFuncMap[subscr]
+		sFunc(bot, db, subscr, update.Message.Chat.ID)
+		return
 	}
 
 	msg := tgbotapi.NewMessage(

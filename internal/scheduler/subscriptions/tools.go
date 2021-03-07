@@ -16,7 +16,7 @@ func Send(bot *tgbotapi.BotAPI, db *gorm.DB) {
 
 	roundedMinMinutes := now.Minute() / 10 * 10
 	minTime := now.Hour()*3600 + roundedMinMinutes*60
-	maxTime := now.Hour()*3600 + (roundedMinMinutes+9)*60 + 59
+	maxTime := minTime + 600
 
 	var chatSubscriptions []models.ChatSubscription
 
@@ -34,7 +34,11 @@ func Send(bot *tgbotapi.BotAPI, db *gorm.DB) {
 			log.Print("Subscription func not found error")
 			continue
 		}
-		sFunc(bot, db, subscr)
+
+		var chat models.Chat
+		db.First(&chat, chatSubscr.ChatID)
+
+		sFunc(bot, db, subscr, chat.TgID)
 	}
 }
 
