@@ -78,5 +78,6 @@ func Run() {
 		go handlers.CurrencyConverterHandler(update, bot, db)
 		go handlers.SwitchHandler(update, bot)
 		go handlers.SubscriptionsHandler(update, bot, db)
+		go handlers.DecorateTextHandler(update, bot)
 	}
 }

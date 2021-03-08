@@ -38,7 +38,11 @@ func cmdHelp(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 		"/subscription covid19-moscow - с помощью этой команды можно получить сегодняшнею информацию, " +
 		"без подписки на рассылку\n\n" +
 		"/roll - а так я скажу Вам случайное число от 0 до 100\n" +
-		"/switch L;bdbc - cfvsq kexibq ,jn!) - могу и текст Ваш починить)"
+		"/switch L;bdbc - cfvsq kexibq ,jn!) - могу и текст Ваш починить)\n\n" +
+		"/decorate - на эту команду я пришлю вам список моих навыков по художественному " +
+		"изменению текста. Да, я обучался каллиграфии :)\n" +
+		"/decorate strth текст, который нужно зачеркнуть - пример того, как можно использовать мой навык рисовать " +
+		"прямые линии)"
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 	_, _ = bot.Send(msg)
 }
@@ -51,18 +55,18 @@ func cmdRoll(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	_, _ = bot.Send(msg)
 }
 
+var cmdFuncMap = map[string]func(update tgbotapi.Update, bot *tgbotapi.BotAPI){
+	"/version": cmdVersion,
+	"/help":    cmdHelp,
+	"/roll":    cmdRoll,
+}
+
 // BaseCommandHandler базовый обработчик для выполнения команд. получает сообщение
 // и если это сообщение - известная команда - вызывает нужную функцию
 func BaseCommandHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	// выходим сразу, если сообщения нет
 	if update.Message == nil {
 		return
-	}
-
-	cmdFuncMap := map[string]func(update tgbotapi.Update, bot *tgbotapi.BotAPI){
-		"/version": cmdVersion,
-		"/help":    cmdHelp,
-		"/roll":    cmdRoll,
 	}
 
 	if cmdFunc, ok := cmdFuncMap[update.Message.Text]; ok {
