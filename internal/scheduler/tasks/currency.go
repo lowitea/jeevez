@@ -43,9 +43,17 @@ func getCurrencyRate(url string) (float64, error) {
 		return 0, err
 	}
 
-	tpl := regexp.MustCompile(`{"\w{3}_\w{3}":(\d+.\d+)}`)
-	rateStr := tpl.FindStringSubmatch(string(body))[1]
+	bodyStr := string(body)
 
+	tpl := regexp.MustCompile(`{"\w{3}_\w{3}":(\d+.\d+)}`)
+	parsedBody := tpl.FindStringSubmatch(bodyStr)
+
+	if len(parsedBody) < 2 {
+		log.Printf("Error parsed currency api.\nBody: %s", bodyStr)
+		return 0, err
+	}
+
+	rateStr := parsedBody[1]
 	rate, err := strconv.ParseFloat(rateStr, 64)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
