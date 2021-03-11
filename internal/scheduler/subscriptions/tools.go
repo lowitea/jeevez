@@ -18,7 +18,7 @@ func Send(bot *tgbotapi.BotAPI, db *gorm.DB) {
 
 	roundedMinMinutes := now.Minute() / 10 * 10
 	minTime := now.Hour()*3600 + roundedMinMinutes*60
-	maxTime := minTime + 600
+	maxTime := minTime + 590
 
 	var chatSubscriptions []models.ChatSubscription
 
