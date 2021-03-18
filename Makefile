@@ -18,9 +18,7 @@ check:  ## Запуск проверок проекта
 	golangci-lint run
 
 build:  ## Сборка приложения
-	CGO_ENABLED=0 \
-	GOOS=linux \
-	go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main ./cmd/jeevez/main.go
+	GOOS=linux go build -o jeevez ./cmd/jeevez/main.go
 
 run:  ## Запуск проекта
 	go run cmd/jeevez/main.go
