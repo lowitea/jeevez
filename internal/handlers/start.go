@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// StartHandler обрабатывает команду /start добавляет чатик в базу
 func StartHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if update.Message.Text != "/start" {
 		return

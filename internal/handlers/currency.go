@@ -101,12 +101,8 @@ func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 	_, _ = bot.Send(msg)
 }
 
+// CurrencyConverterHandler обрабатывает команды конвертации валют
 func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
-	// выходим сразу, если сообщения нет
-	if update.Message == nil {
-		return
-	}
-
 	if strings.HasPrefix(update.Message.Text, "/currency_rate") {
 		cmdCurrencyRate(update, bot, db)
 		return

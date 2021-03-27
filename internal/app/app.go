@@ -73,6 +73,10 @@ func Run() {
 
 	// запуск обработки сообщений
 	for update := range updates {
+		// пропускаем, если сообщения нет
+		if update.Message == nil {
+			continue
+		}
 		go handlers.StartHandler(update, bot, db)
 		go handlers.BaseCommandHandler(update, bot)
 		go handlers.CurrencyConverterHandler(update, bot, db)

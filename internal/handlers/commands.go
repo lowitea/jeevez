@@ -64,11 +64,6 @@ var cmdFuncMap = map[string]func(update tgbotapi.Update, bot *tgbotapi.BotAPI){
 // BaseCommandHandler базовый обработчик для выполнения команд. получает сообщение
 // и если это сообщение - известная команда - вызывает нужную функцию
 func BaseCommandHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-	// выходим сразу, если сообщения нет
-	if update.Message == nil {
-		return
-	}
-
 	if cmdFunc, ok := cmdFuncMap[update.Message.Text]; ok {
 		cmdFunc(update, bot)
 		return
