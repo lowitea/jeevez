@@ -28,7 +28,7 @@ func Run() {
 	//cache, _ := bigcache.NewBigCache(bigcache.DefaultConfig(12 * time.Hour))
 
 	// инициализация базы
-	db, err := tools.InitDB(cfg)
+	db, err := tools.InitDB(cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName)
 	if err != nil {
 		log.Fatalf("error init database %s", err)
 	}
