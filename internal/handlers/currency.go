@@ -26,6 +26,7 @@ func getCurrencyRate(db *gorm.DB, curPair string) (float64, error) {
 	return currencyRate.Value, nil
 }
 
+// getCurPair функция принимающая введённые пользователем названия валют и возвращающая имя пары
 func getCurPair(firstCur string, secCur string) string {
 	var firstElem string
 	var secElem string
