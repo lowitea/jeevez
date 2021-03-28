@@ -15,8 +15,7 @@ func main() {
 	// инициализируем конфиг
 	cfg, err := config.InitConfig()
 	if err != nil {
-		log.Printf("env parse error %s", err)
-		os.Exit(1)
+		log.Fatalf("env parse error %s", err)
 	}
 
 	// инициализация базы
@@ -26,8 +25,7 @@ func main() {
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Printf("failed to connect database: %s", err)
-		os.Exit(1)
+		log.Fatalf("failed to connect database: %s", err)
 	}
 
 	app := &cli.App{}

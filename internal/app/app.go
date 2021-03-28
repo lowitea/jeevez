@@ -1,17 +1,12 @@
 package app
 
 import (
-	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/handlers"
-	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/scheduler"
-	"github.com/lowitea/jeevez/internal/scheduler/subscriptions"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/lowitea/jeevez/internal/tools"
 	"log"
-	"os"
 )
 
 // Run функция запускающая бот
@@ -19,14 +14,12 @@ func Run() {
 	// инициализируем конфиг
 	cfg, err := config.InitConfig()
 	if err != nil {
-		log.Printf("env parse error %s", err)
-		os.Exit(1)
+		log.Fatalf("env parse error %s", err)
 	}
 
 	bot, err := tgbotapi.NewBotAPI(cfg.Telegram.Token)
 	if err != nil {
-		log.Printf("error connect to telegram %s", err)
-		os.Exit(1)
+		log.Fatalf("error connect to telegram %s", err)
 	}
 	log.Printf("Bot version: %s", cfg.App.Version)
 	log.Printf("Authorized on account %s", bot.Self.UserName)
@@ -35,26 +28,9 @@ func Run() {
 	//cache, _ := bigcache.NewBigCache(bigcache.DefaultConfig(12 * time.Hour))
 
 	// инициализация базы
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d",
-		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.Port,
-	)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := tools.InitDB(cfg)
 	if err != nil {
-		log.Printf("failed to connect database: %s", err)
-		os.Exit(1)
-	}
-
-	// миграция моделей
-	if err := models.MigrateAll(db); err != nil {
-		log.Printf("migrating error: %s", err)
-		os.Exit(1)
-	}
-
-	// инициализация вариантов подписок
-	if err := subscriptions.InitSubscriptions(db); err != nil {
-		log.Printf("subscriptions init error: %s", err)
-		os.Exit(1)
+		log.Fatalf("error init database %s", err)
 	}
 
 	// запуск фоновых задач
