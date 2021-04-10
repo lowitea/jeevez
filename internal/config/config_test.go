@@ -9,6 +9,11 @@ import (
 
 // TestInitConfig тестирует инициализацию конфига
 func TestInitConfig(t *testing.T) {
+	// ансетим обязательную переменную
+	_ = os.Unsetenv("JEEVEZ_DB_USER")
+	cfg, err := InitConfig()
+	require.Error(t, err)
+
 	// устанавливаем необходимые переменные в окружение
 	_ = os.Setenv("JEEVEZ_APP_VERSION", "1.2.3")
 	_ = os.Setenv("JEEVEZ_TELEGRAM_TOKEN", "telegram_token")
@@ -37,7 +42,7 @@ func TestInitConfig(t *testing.T) {
 		}{"currency_token"},
 	}
 
-	cfg, err := InitConfig()
+	cfg, err = InitConfig()
 	require.NoError(t, err)
 
 	// проверяем вернувшийся конфиг
