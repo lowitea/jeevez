@@ -23,8 +23,15 @@ jobs:
 
     - name: Run autotests
       run: |
-        go test -race -cover -coverprofile=coverage.out -v ./...
+        go test -race -cover -coverprofile=coverage.out -covermode=atomic -v ./...
         go tool cover -func=coverage.out
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CI_CODECOV_TOKEN }}
+        file: ./coverage.out
+        fail_ci_if_error: true
 
   style-check:
     runs-on: ubuntu-latest
