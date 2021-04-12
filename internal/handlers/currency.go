@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
+	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
 	"log"
 	"regexp"
@@ -80,7 +81,7 @@ func getMsgAllCurrencies(db *gorm.DB) (msgText string, err error) {
 }
 
 // cmdCurrencyRate команда /currency_rate показывает доступные пары валют или курс по конкретной паре
-func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdCurrencyRate(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
 
 	var msgText string
@@ -89,7 +90,7 @@ func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 	if len(args) == 1 {
 		msgText, err := getMsgAllCurrencies(db)
 		if err != nil {
-			msgText = "Я прошу прощения. Биржа не отвечает по телефону." +
+			msgText = "Я прошу прощения. Биржа не отвечает по телефону. " +
 				"Попробуйте уточнить у меня список валют позднее."
 		}
 

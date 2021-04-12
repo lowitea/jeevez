@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/tools/testTools"
 	"github.com/stretchr/testify/assert"
@@ -78,8 +79,70 @@ func TestGetMsgAllCurrencies(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(
 		t,
-		"Курсы всех доступных валютных пар:\n\nUSD_EUR:"+
-			"    42.000000\nEUR_USD:    100500.000000\n",
+		"Курсы всех доступных валютных пар:\n\n"+
+			"USD_EUR:    42.000000\n"+
+			"EUR_USD:    100500.000000\n",
 		msg,
 	)
+}
+
+// TestCmdCurrencyRateAllRates получение списка всех валют
+func TestCmdCurrencyRateAllRates(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	update := testTools.NewUpdate("/currency_rate")
+
+	// сначала проверяем при пустой базе
+	db.Exec("DELETE FROM currency_rates")
+	expMsg := tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		"Я прошу прощения. Биржа не отвечает по телефону. "+
+			"Попробуйте уточнить у меня список валют позднее.",
+	)
+	botAPIMock := testTools.NewBotAPIMock(expMsg)
+
+	cmdCurrencyRate(update, botAPIMock, db)
+
+	botAPIMock.AssertExpectations(t)
+
+	// теперь проверяем при наличии валют в базе
+	db.Create(&models.CurrencyRate{Value: 100, Name: "RUB_USD"})
+	expMsg = tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		"Курсы всех доступных валютных пар:\n\n"+
+			"RUB_USD:    100.000000\n",
+	)
+	botAPIMock = testTools.NewBotAPIMock(expMsg)
+
+	cmdCurrencyRate(update, botAPIMock, db)
+
+	botAPIMock.AssertExpectations(t)
+}
+
+// TestCmdCurrencyRateOneRate получение значение одной валютной пары
+func TestCmdCurrencyRateOneRate(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	update := testTools.NewUpdate("/currency_rate RUB_USD")
+
+	// пробуем получить несуществующую валюту
+	db.Exec("DELETE FROM currency_rates")
+	expMsg := tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		"К сожалению, я не смог найти курс Вашей валюты. "+
+			"Попробуйте проверить список доступных валют, повторив "+
+			"эту команду без параметров.",
+	)
+	botAPIMock := testTools.NewBotAPIMock(expMsg)
+
+	cmdCurrencyRate(update, botAPIMock, db)
+
+	botAPIMock.AssertExpectations(t)
+
+	// теперь получаем существующую
+	db.Create(&models.CurrencyRate{Value: 42, Name: "RUB_USD"})
+	expMsg = tgbotapi.NewMessage(update.Message.Chat.ID, "42.000000")
+	botAPIMock = testTools.NewBotAPIMock(expMsg)
+
+	cmdCurrencyRate(update, botAPIMock, db)
+
+	botAPIMock.AssertExpectations(t)
 }
