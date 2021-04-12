@@ -54,29 +54,43 @@ func getCurPair(firstCur string, secCur string) string {
 	return fmt.Sprintf("%s_%s", firstElem, secElem)
 }
 
+// getMsgAllCurrencies формирует сообщение со списком всех валют
+func getMsgAllCurrencies(db *gorm.DB) (msgText string, err error) {
+	var curRates []models.CurrencyRate
+	result := db.Find(&curRates)
+	if result.Error != nil {
+		log.Printf("getting currencies from db error: %s", result.Error)
+		return "", result.Error
+	}
+
+	if len(curRates) == 0 {
+		log.Printf("none rates")
+		return "", errors.New("none rates")
+	}
+
+	var msgTextB bytes.Buffer
+	msgTextB.WriteString("Курсы всех доступных валютных пар:\n\n")
+
+	for _, curRate := range curRates {
+		msgTextB.WriteString(curRate.Name)
+		msgTextB.WriteString(fmt.Sprintf(":    %.6f", curRate.Value))
+		msgTextB.WriteString("\n")
+	}
+	return msgTextB.String(), nil
+}
+
 // cmdCurrencyRate команда /currency_rate показывает доступные пары валют или курс по конкретной паре
 func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
+
 	var msgText string
 
 	// команда пришла без параметров, отправляем список валют
 	if len(args) == 1 {
-		var curRates []models.CurrencyRate
-		result := db.Find(&curRates)
-		if result.Error != nil {
-			log.Printf("getting currencies from db error: %s", result.Error)
+		msgText, err := getMsgAllCurrencies(db)
+		if err != nil {
 			msgText = "Я прошу прощения. Биржа не отвечает по телефону." +
 				"Попробуйте уточнить у меня список валют позднее."
-		} else {
-			var msgTextB bytes.Buffer
-			msgTextB.WriteString("Курсы всех доступных валютных пар:\n\n")
-
-			for _, curRate := range curRates {
-				msgTextB.WriteString(curRate.Name)
-				msgTextB.WriteString(fmt.Sprintf(":    %.6f", curRate.Value))
-				msgTextB.WriteString("\n")
-			}
-			msgText = msgTextB.String()
 		}
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)

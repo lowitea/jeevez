@@ -58,3 +58,28 @@ func TestGetCurrencyRate(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, expValue, rate)
 }
+
+// TestGetMsgAllCurrencies тестирует функцию формирования сообщения со всеми доступными валютами
+func TestGetMsgAllCurrencies(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+
+	msg, err := getMsgAllCurrencies(db)
+	assert.Errorf(t, err, "none rates")
+	assert.Equal(t, "", msg)
+
+	rates := [...]models.CurrencyRate{
+		{Value: 42, Name: "USD_EUR"},
+		{Value: 100500, Name: "EUR_USD"},
+	}
+
+	db.Create(&rates)
+
+	msg, err = getMsgAllCurrencies(db)
+	assert.NoError(t, err)
+	assert.Equal(
+		t,
+		"Курсы всех доступных валютных пар:\n\nUSD_EUR:"+
+			"    42.000000\nEUR_USD:    100500.000000\n",
+		msg,
+	)
+}
