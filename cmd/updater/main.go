@@ -28,7 +28,7 @@ func main() {
 		log.Fatalf("failed to connect database: %s", err)
 	}
 
-	app := &cli.App{}
+	app := &cli.App{Usage: "A cli app for update date in Jeevez"}
 
 	app.Commands = []*cli.Command{
 		{
