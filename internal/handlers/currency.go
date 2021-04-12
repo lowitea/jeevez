@@ -118,7 +118,7 @@ func cmdCurrencyRate(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 }
 
 // CurrencyConverterHandler обрабатывает команды конвертации валют
-func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func CurrencyConverterHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	if strings.HasPrefix(update.Message.Text, "/currency_rate") {
 		cmdCurrencyRate(update, bot, db)
 		return
@@ -137,6 +137,8 @@ func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *
 	currencyPair := getCurPair(tokens[2], tokens[3])
 
 	var result float64
+
+	// если вернулась пустая строка, значит валюты одинаковые и нужно вернуть тоже значение, что ввели
 	if currencyPair == "" {
 		result = value
 	} else {

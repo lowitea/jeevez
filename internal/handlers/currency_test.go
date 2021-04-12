@@ -146,3 +146,66 @@ func TestCmdCurrencyRateOneRate(t *testing.T) {
 
 	botAPIMock.AssertExpectations(t)
 }
+
+// TestCurrencyConverterHandler проверяет обработчик команд для валют
+func TestCurrencyConverterHandler(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	db.Create(&[...]models.CurrencyRate{
+		{Value: 77.425037, Name: "USD_RUB"},
+		{Value: 0.840899, Name: "USD_EUR"},
+		{Value: 0.012916, Name: "RUB_USD"},
+		{Value: 0.010861, Name: "RUB_EUR"},
+		{Value: 1.189850, Name: "EUR_USD"},
+		{Value: 92.124168, Name: "EUR_RUB"},
+	})
+
+	cases := [...]struct {
+		Cmd     string
+		MsgText string
+	}{
+		{
+			"/currency_rate",
+			"Курсы всех доступных валютных пар:\n\n" +
+				"USD_RUB:    77.425037\n" +
+				"USD_EUR:    0.840899\n" +
+				"RUB_USD:    0.012916\n" +
+				"RUB_EUR:    0.010861\n" +
+				"EUR_USD:    1.189850\n" +
+				"EUR_RUB:    92.124168\n",
+		},
+		{"/currency_rate RUB_USD", "0.012916"},
+		{"/currency_rate EUR_USD", "1.189850"},
+		{"1000 долларов в рубли", "77425.04"},
+		{"42 рубля в рубли", "42.00"},
+		{"42 рубля в доллары", "0.54"},
+	}
+
+	for _, c := range cases {
+		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
+			update := testTools.NewUpdate(c.Cmd)
+			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
+			botAPIMock := testTools.NewBotAPIMock(expMsg)
+
+			CurrencyConverterHandler(update, botAPIMock, db)
+
+			botAPIMock.AssertExpectations(t)
+		})
+	}
+
+	// проверяем дополнительные невалидные кейсы
+	db.Delete(models.CurrencyRate{}, "name = ?", "RUB_USD")
+	badCases := [...]string{
+		"невалидное сообщение",
+		"42 рубля в доллары",
+	}
+	for _, cmd := range badCases {
+		t.Run(fmt.Sprintf("cmd=%s", cmd), func(t *testing.T) {
+			update := testTools.NewUpdate(cmd)
+			botAPIMock := testTools.NewBotAPIMock(tgbotapi.MessageConfig{})
+
+			CurrencyConverterHandler(update, botAPIMock, db)
+
+			botAPIMock.AssertNotCalled(t, "Send")
+		})
+	}
+}
