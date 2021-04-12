@@ -20,7 +20,7 @@ func StartHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&chat); result.Error != nil {
 		log.Printf("create User error: %s", result.Error)
 		msgText = msgText +
-			"К сожалению, не получилось Вас зарегистрировать," +
+			"К сожалению, не получилось Вас зарегистрировать, " +
 			"попробуйте пожалуйста позже, с помощью команды /start ):"
 	} else {
 		msgText = msgText +
