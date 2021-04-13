@@ -3,13 +3,14 @@ package handlers
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
+	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"log"
 )
 
 // StartHandler обрабатывает команду /start добавляет чатик в базу
-func StartHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func StartHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	if update.Message.Text != "/start" {
 		return
 	}
