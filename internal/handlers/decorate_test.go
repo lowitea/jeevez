@@ -25,7 +25,7 @@ func TestDecorateTextHandler(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		t.Run(fmt.Sprintf("text=%s", c.Cmd), func(t *testing.T) {
+		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
 			update := testTools.NewUpdate("/decorate " + c.Cmd)
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
 			botAPIMock := testTools.NewBotAPIMock(expMsg)
