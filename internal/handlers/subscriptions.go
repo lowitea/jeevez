@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -20,11 +21,18 @@ func cmdSubscriptions(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	var msgTextB bytes.Buffer
 	msgTextB.WriteString("Все доступные темы для подписки:\n\n")
 
-	for subscr := range subscriptions.SubscriptionFuncMap {
+	// сортируем словарь подписок
+	var subscrsMapKeys []string
+	for k := range models.SubscrNameSubscrMap {
+		subscrsMapKeys = append(subscrsMapKeys, k)
+	}
+	sort.Strings(subscrsMapKeys)
+
+	for _, subscrKey := range subscrsMapKeys {
 		msgTextB.WriteString("<b>")
-		msgTextB.WriteString(subscr.Name)
+		msgTextB.WriteString(models.SubscrNameSubscrMap[subscrKey].Name)
 		msgTextB.WriteString("</b> - ")
-		msgTextB.WriteString(subscr.Description)
+		msgTextB.WriteString(models.SubscrNameSubscrMap[subscrKey].Description)
 		msgTextB.WriteString("\n")
 	}
 
