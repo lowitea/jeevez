@@ -45,7 +45,7 @@ func TestGetCurrencyRate(t *testing.T) {
 	db.Where("name = ?", curName).Delete(&models.CurrencyRate{})
 
 	rate, err := getCurrencyRate(db, curName)
-	assert.Errorf(t, err, "record not found")
+	assert.EqualError(t, err, "record not found")
 	assert.Equal(t, 0.0, rate)
 
 	expValue := 100500.42
@@ -66,7 +66,7 @@ func TestGetMsgAllCurrencies(t *testing.T) {
 	// проверяем работу с пустой базой
 	db.Exec("DELETE FROM currency_rates")
 	msg, err := getMsgAllCurrencies(db)
-	assert.Errorf(t, err, "none rates")
+	assert.EqualError(t, err, "none rates")
 	assert.Equal(t, "", msg)
 
 	rates := [...]models.CurrencyRate{
