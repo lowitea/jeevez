@@ -7,6 +7,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/scheduler/subscriptions"
+	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"log"
@@ -15,7 +16,7 @@ import (
 )
 
 // cmdSubscriptions выводит список всех доступных подписок
-func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdSubscriptions(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	var msgTextB bytes.Buffer
 	msgTextB.WriteString("Все доступные темы для подписки:\n\n")
 
@@ -33,7 +34,7 @@ func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB)
 	db.First(&chat, "tg_id = ?", update.Message.Chat.ID)
 
 	var chatSubscrs []models.ChatSubscription
-	db.Find(&chatSubscrs, "chat_id = ?", chat.ID)
+	db.Order("time").Find(&chatSubscrs, "chat_id = ?", chat.ID)
 
 	if len(chatSubscrs) > 0 {
 		msgTextB.WriteString("\nТемы на которые Вы подписаны:\n")
@@ -41,17 +42,13 @@ func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB)
 
 	for _, chatSubscr := range chatSubscrs {
 		var subscr models.Subscription
-		if result := db.First(&subscr, chatSubscr.SubscriptionID); result.Error != nil {
-			continue
-		}
+		db.First(&subscr, chatSubscr.SubscriptionID)
 
-		msgTextB.WriteString("\n")
-		msgTextB.WriteString("- <b>")
+		msgTextB.WriteString("\n- <b>")
 		msgTextB.WriteString(subscr.Name)
 		msgTextB.WriteString(" [")
 		msgTextB.WriteString(chatSubscr.HumanTime)
-		msgTextB.WriteString("]")
-		msgTextB.WriteString("</b> - ")
+		msgTextB.WriteString("]</b> - ")
 		msgTextB.WriteString(subscr.Description)
 	}
 
@@ -113,7 +110,7 @@ func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	var ok bool
 
 	// если не нашли, отправляем сообщение и выходим
-	if subscr, ok = subscriptions.SubscrNameSubscrMap[subscrName]; !ok {
+	if subscr, ok = models.SubscrNameSubscrMap[subscrName]; !ok {
 		msg := tgbotapi.NewMessage(
 			update.Message.Chat.ID,
 			"К сожалению, такой темы не существует(\n"+
@@ -246,7 +243,7 @@ func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 
 	subscrName := args[1]
 
-	if subscr, ok := subscriptions.SubscrNameSubscrMap[subscrName]; ok {
+	if subscr, ok := models.SubscrNameSubscrMap[subscrName]; ok {
 		sFunc := subscriptions.SubscriptionFuncMap[subscr]
 		sFunc(bot, db, subscr, update.Message.Chat.ID)
 		return
