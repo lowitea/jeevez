@@ -42,10 +42,9 @@ func TestGetCurrencyRate(t *testing.T) {
 	curName := "USD_EUR"
 
 	db, _ := testTools.InitTestDB()
-	db.Where(fmt.Sprintf("name = %s", curName)).Delete(&models.CurrencyRate{})
+	db.Where("name = ?", curName).Delete(&models.CurrencyRate{})
 
-	rate, err := getCurrencyRate(db, "USD_EUR")
-
+	rate, err := getCurrencyRate(db, curName)
 	assert.Errorf(t, err, "record not found")
 	assert.Equal(t, 0.0, rate)
 
@@ -54,7 +53,7 @@ func TestGetCurrencyRate(t *testing.T) {
 		Value: expValue,
 		Name:  curName,
 	})
-	rate, err = getCurrencyRate(db, "USD_EUR")
+	rate, err = getCurrencyRate(db, curName)
 
 	require.NoError(t, err)
 	assert.Equal(t, expValue, rate)
@@ -64,6 +63,8 @@ func TestGetCurrencyRate(t *testing.T) {
 func TestGetMsgAllCurrencies(t *testing.T) {
 	db, _ := testTools.InitTestDB()
 
+	// проверяем работу с пустой базой
+	db.Exec("DELETE FROM currency_rates")
 	msg, err := getMsgAllCurrencies(db)
 	assert.Errorf(t, err, "none rates")
 	assert.Equal(t, "", msg)
@@ -150,6 +151,7 @@ func TestCmdCurrencyRateOneRate(t *testing.T) {
 // TestCurrencyConverterHandler проверяет обработчик команд для валют
 func TestCurrencyConverterHandler(t *testing.T) {
 	db, _ := testTools.InitTestDB()
+	db.Exec("DELETE FROM currency_rates")
 	db.Create(&[...]models.CurrencyRate{
 		{Value: 77.425037, Name: "USD_RUB"},
 		{Value: 0.840899, Name: "USD_EUR"},
