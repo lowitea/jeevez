@@ -1,12 +1,46 @@
 package tools
 
 import (
+	"errors"
 	"fmt"
 	"github.com/lowitea/jeevez/internal/models"
-	"github.com/lowitea/jeevez/internal/scheduler/subscriptions"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
 )
+
+// InitSubscriptions создаёт в базе недостающие подписки
+func InitSubscriptions(db *gorm.DB) error {
+	log.Print("InitSubscriptions has started")
+	for _, subscr := range models.SubscrNameSubscrMap {
+		// пытаемся получить подписку из базы по id и name
+		subscrDB := models.Subscription{}
+		result := db.First(&subscrDB, "id = ? AND name = ?", subscr.ID, subscr.Name)
+
+		// если такого не нашлось, создаём
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			// так как у нас захардкожены id в коде, нужно попробовать удалить из базы запись с таким id
+			_ = db.Delete(&models.ChatSubscription{}, "subscription_id = ?", subscr.ID)
+			_ = db.Delete(&models.Subscription{}, subscr.ID)
+
+			// создаём новую запись
+			if result = db.Create(&subscr); result.Error != nil {
+				log.Printf("create Subscription error: %s", result.Error)
+				return result.Error
+			}
+			continue
+		} else if result.Error != nil {
+			log.Printf("update Subscription error: %s", result.Error)
+			return result.Error
+		}
+
+		// обновляем запись если отличаются другие поля
+		if subscr.Description != subscrDB.Description {
+			db.Save(&subscr)
+		}
+	}
+	return nil
+}
 
 // ConnectDB открываем коннект к базе данных
 func ConnectDB(host string, port int, user string, pwd string, dbName string) (*gorm.DB, error) {
@@ -22,7 +56,7 @@ func SetupDB(db *gorm.DB) error {
 	}
 
 	// инициализация вариантов подписок
-	if err := subscriptions.InitSubscriptions(db); err != nil {
+	if err := InitSubscriptions(db); err != nil {
 		return err
 	}
 	return nil
