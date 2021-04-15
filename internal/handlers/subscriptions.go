@@ -34,7 +34,7 @@ func cmdSubscriptions(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	db.First(&chat, "tg_id = ?", update.Message.Chat.ID)
 
 	var chatSubscrs []models.ChatSubscription
-	db.Order("time").Find(&chatSubscrs, "chat_id = ?", chat.ID)
+	db.Order("time, subscription_id").Find(&chatSubscrs, "chat_id = ?", chat.ID)
 
 	if len(chatSubscrs) > 0 {
 		msgTextB.WriteString("\nТемы на которые Вы подписаны:\n")

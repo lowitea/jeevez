@@ -18,7 +18,13 @@ func TestCmdSubscriptions(t *testing.T) {
 	chat := models.Chat{TgID: 1}
 	db.Create(&chat)
 	for _, subscrData := range models.SubscrNameSubscrMap {
-		db.Create(&models.ChatSubscription{ChatID: chat.ID, SubscriptionID: subscrData.ID, HumanTime: hTime})
+		db.Create(&models.ChatSubscription{
+			ChatID:         chat.ID,
+			SubscriptionID: subscrData.ID,
+			HumanTime:      hTime,
+			// делаем инкемент времени для проверки сортировки
+			Time: subscrData.ID + 1000,
+		})
 	}
 
 	update := testTools.NewUpdate("/subscriptions")
