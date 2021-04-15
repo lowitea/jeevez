@@ -8,6 +8,7 @@ import (
 	"testing"
 )
 
+// TestStartHandler проверяет обработчки команды /start
 func TestStartHandler(t *testing.T) {
 	db, _ := testTools.InitTestDB()
 
