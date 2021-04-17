@@ -102,3 +102,95 @@ func TestParseTimeInvalid(t *testing.T) {
 		})
 	}
 }
+
+// TestCndSubscribeInvalid проверяем невалидные кейсы для команды подписки
+func TestCndSubscribeInvalid(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	cases := [...]struct {
+		Cmd       string
+		MsgText   string
+		ParseMode string
+	}{
+		{
+			"/subscribe theme",
+			"Чтобы подписаться, отправьте команду в формате:\n" +
+				"/subscribe название_темы время_оповещения\n" +
+				"Например, так:\n" +
+				"/subscribe covid19-russia 11:00",
+			"",
+		},
+		{
+			"/subscribe no_exist_theme 11:00",
+			"К сожалению, такой темы не существует(\n" +
+				"Посмотреть доступные можно по команде /subscriptions",
+			"",
+		},
+		{
+			"/subscribe covid19-russia 25:00",
+			"Время должно быть не меньше чем 0:00 и меньше чем 24:00, без секунд.",
+			"",
+		},
+		{
+			"/subscribe covid19-russia 11:00",
+			"К сожалению, не получилось Вас подписать на тему, попробуйте пожалуйста позже ):",
+			"HTML",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
+			update := testTools.NewUpdate(c.Cmd)
+			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
+			expMsg.ParseMode = c.ParseMode
+			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			cmdSubscribe(update, botAPIMock, db)
+			botAPIMock.AssertExpectations(t)
+		})
+	}
+}
+
+// TestCndSubscribe проверяем подписку
+func TestCndSubscribe(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+
+	update := testTools.NewUpdate("/subscribe covid19-russia 11:00")
+
+	chat := models.Chat{TgID: update.Message.Chat.ID}
+	db.Create(&chat)
+
+	// проверяем создание новой подписки
+	expMsg := tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		"Я понял Вас :)\nБудет сделано.\n"+
+			"Теперь я буду приходить и рассказывать вам новости по теме "+
+			"<b>covid19-russia</b> каждый день в <b>11:00</b>.",
+	)
+	expMsg.ParseMode = "HTML"
+
+	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	cmdSubscribe(update, botAPIMock, db)
+	botAPIMock.AssertExpectations(t)
+
+	var chatSubscr models.ChatSubscription
+	db.Last(&chatSubscr)
+
+	assert.Equal(t, chat.ID, chatSubscr.ChatID)
+	assert.Equal(t, int64(1), chatSubscr.SubscriptionID)
+	assert.Equal(t, int64(39600), chatSubscr.Time)
+	assert.Equal(t, "11:00", chatSubscr.HumanTime)
+
+	// проверяем апдейт времени существующей подписки
+	update.Message.Text = "/subscribe covid19-russia 23:42"
+	expMsg.Text = "Я понял Вас :)\nБудет сделано.\n" +
+		"Теперь я буду приходить и рассказывать вам новости по теме " +
+		"<b>covid19-russia</b> каждый день в <b>23:42</b>."
+	botAPIMock = testTools.NewBotAPIMock(expMsg)
+	cmdSubscribe(update, botAPIMock, db)
+
+	botAPIMock.AssertExpectations(t)
+
+	db.Find(&chatSubscr, "chat_id = ? and subscription_id = ?", chat.ID, 1)
+
+	assert.Equal(t, int64(85320), chatSubscr.Time)
+	assert.Equal(t, "23:42", chatSubscr.HumanTime)
+}

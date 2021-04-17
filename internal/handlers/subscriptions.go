@@ -95,7 +95,7 @@ func parseTime(timeStr string) (int64, error) {
 }
 
 // cmdSubscribe подписывает чат на заданную рассылку
-func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdSubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
 
 	if len(args) != 3 {
