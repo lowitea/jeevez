@@ -334,3 +334,58 @@ func TestCmdSubscription(t *testing.T) {
 	cmdSubscription(update, botAPIMock, db)
 	botAPIMock.AssertExpectations(t)
 }
+
+// TestSubscriptionsHandler тестирует общий обработчик для команд управления подписками
+func TestSubscriptionsHandler(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	cases := [...]struct {
+		Cmd       string
+		MsgText   string
+		ParseMode string
+	}{
+		{
+			"/subscriptions",
+			"Все доступные темы для подписки:\n\n" +
+				"<b>covid19-moscow</b> - Дневная статистика по COViD-19 по Москве\n" +
+				"<b>covid19-russia</b> - Дневная статистика по COViD-19 по России\n\n" +
+				"Пример команды для подписки:\n" +
+				"/subscribe covid19-russia 11:00\n\n",
+			"HTML",
+		},
+		{
+			"/subscribe",
+			"Чтобы подписаться, отправьте команду в формате:\n" +
+				"/subscribe название_темы время_оповещения\n" +
+				"Например, так:\n" +
+				"/subscribe covid19-russia 11:00",
+			"",
+		},
+		{
+			"/unsubscribe",
+			"Чтобы отписаться от темы, отправьте команду в формате:\n" +
+				"/unsubscribe название_темы\n" +
+				"Например, так:\n" +
+				"/unsubscribe covid19-russia",
+			"",
+		},
+		{
+			"/subscription",
+			"Чтобы получить информацию по теме, отправьте команду в формате:\n" +
+				"/subscription название_темы\n" +
+				"Например, так:\n" +
+				"/subscription covid19-russia",
+			"",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
+			update := testTools.NewUpdate(c.Cmd)
+			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
+			expMsg.ParseMode = c.ParseMode
+			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			SubscriptionsHandler(update, botAPIMock, db)
+			botAPIMock.AssertExpectations(t)
+		})
+	}
+}
