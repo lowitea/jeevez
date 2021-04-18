@@ -59,6 +59,16 @@ func TestGetCurrencyRate(t *testing.T) {
 	assert.Equal(t, expValue, rate)
 }
 
+// TestGetCurrencyRateDBError проверяет ошибку в бд в функции getCurrencyRate
+func TestGetCurrencyRateDBError(t *testing.T) {
+	db := testTools.InitTestDB()
+	db.Exec("DROP TABLE currency_rates")
+
+	rate, err := getCurrencyRate(db, "USD_EUR")
+	assert.EqualError(t, err, "ERROR: relation \"currency_rates\" does not exist (SQLSTATE 42P01)")
+	assert.Equal(t, 0.0, rate)
+}
+
 // TestGetMsgAllCurrencies тестирует функцию формирования сообщения со всеми доступными валютами
 func TestGetMsgAllCurrencies(t *testing.T) {
 	db := testTools.InitTestDB()
@@ -85,6 +95,16 @@ func TestGetMsgAllCurrencies(t *testing.T) {
 			"EUR_USD:    100500.000000\n",
 		msg,
 	)
+}
+
+// TestGetMsgAllCurrenciesDBError проверяет ошибку в бд в функции getMsgAllCurrencies
+func TestGetMsgAllCurrenciesDBError(t *testing.T) {
+	db := testTools.InitTestDB()
+	db.Exec("DROP TABLE currency_rates")
+
+	rate, err := getMsgAllCurrencies(db)
+	assert.EqualError(t, err, "ERROR: relation \"currency_rates\" does not exist (SQLSTATE 42P01)")
+	assert.Equal(t, "", rate)
 }
 
 // TestCmdCurrencyRateAllRates получение списка всех валют
