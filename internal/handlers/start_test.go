@@ -20,9 +20,7 @@ func TestStartHandler(t *testing.T) {
 	// проверяем невалидную команду
 	update := testTools.NewUpdate("/no_start")
 	botAPIMock := testTools.NewBotAPIMock(tgbotapi.MessageConfig{})
-
 	StartHandler(update, botAPIMock, db)
-
 	botAPIMock.AssertNotCalled(t, "Send")
 
 	// проверяем создание чата в базе
@@ -30,9 +28,7 @@ func TestStartHandler(t *testing.T) {
 	update.Message.Chat.ID = 42
 	expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, successMsg)
 	botAPIMock = testTools.NewBotAPIMock(expMsg)
-
 	StartHandler(update, botAPIMock, db)
-
 	botAPIMock.AssertExpectations(t)
 
 	var chat models.Chat
@@ -45,8 +41,24 @@ func TestStartHandler(t *testing.T) {
 	db.Create(&models.Chat{TgID: 1})
 	expMsg = tgbotapi.NewMessage(update.Message.Chat.ID, successMsg)
 	botAPIMock = testTools.NewBotAPIMock(expMsg)
-
 	StartHandler(update, botAPIMock, db)
+	botAPIMock.AssertExpectations(t)
+}
 
+// TestStartHandlerDBError проверяет работу хендлера при ошибке от базы данных
+func TestStartHandlerDBError(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	db.Exec("DROP TABLE chat_subscriptions")
+	db.Exec("DROP TABLE chats")
+
+	update := testTools.NewUpdate("/start")
+	expMsg := tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		"Приветствую! Я Ваш личный бот помощник. 🤵🏻\n"+
+			"К сожалению, не получилось Вас зарегистрировать, "+
+			"попробуйте пожалуйста позже, с помощью команды /start ):",
+	)
+	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	StartHandler(update, botAPIMock, db)
 	botAPIMock.AssertExpectations(t)
 }
