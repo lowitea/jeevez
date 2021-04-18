@@ -264,5 +264,73 @@ func TestCmdUnsubscribe(t *testing.T) {
 	)
 
 	assert.EqualError(t, result.Error, gorm.ErrRecordNotFound.Error())
+}
 
+// TestCmdSubscriptionInvalid проверяет невалидные кейсы для получения данных темы без подписки
+func TestCmdSubscriptionInvalid(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	cases := [...]struct {
+		Cmd     string
+		MsgText string
+	}{
+		{
+			"/subscription",
+			"Чтобы получить информацию по теме, отправьте команду в формате:\n" +
+				"/subscription название_темы\n" +
+				"Например, так:\n" +
+				"/subscription covid19-russia",
+		},
+		{
+			"/subscription no_exist_theme",
+			"К сожалению, мне не удалось найти в своих записях такую тему :(",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
+			update := testTools.NewUpdate(c.Cmd)
+			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
+			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			cmdSubscription(update, botAPIMock, db)
+			botAPIMock.AssertExpectations(t)
+		})
+	}
+}
+
+// TestCmdSubscription проверяет команду получения данных темы без подписки
+func TestCmdSubscription(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	covidStat := models.CovidStat{
+		SubscriptionName: "covid19-moscow",
+		Confirmed:        10,
+		Deaths:           101,
+		Recovered:        1010,
+		ConfirmedDiff:    23,
+		DeathsDiff:       32,
+		RecoveredDiff:    56,
+		LastUpdate:       "2021-04-18 04:20:41",
+		Active:           45,
+		ActiveDiff:       54,
+		FatalityRate:     99.9,
+	}
+	db.Create(&covidStat)
+
+	update := testTools.NewUpdate("/subscription covid19-moscow")
+	expMsg := tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		"🦠 <b>COVID-19 Статистика []</b>\n"+
+			"2021-04-18 04:20:41\n\n"+
+			"Подтверждённые: 10 (+23)\n"+
+			"Смерти: 101 (+32)\n"+
+			"Выздоровевшие: 1010 (+56)\n"+
+			"Болеющие: 45 (+54)\n"+
+			"Летальность: 99.900000\n\n"+
+			"https://yandex.ru/covid19/stat",
+	)
+	expMsg.ParseMode = "HTML"
+	expMsg.DisableWebPagePreview = true
+	expMsg.DisableNotification = true
+	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	cmdSubscription(update, botAPIMock, db)
+	botAPIMock.AssertExpectations(t)
 }

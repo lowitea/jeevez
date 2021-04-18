@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
+	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
 	"log"
 	"text/template"
@@ -41,7 +42,7 @@ func GetMessage(stat models.CovidStat) string {
 }
 
 // CovidTask таска рассылающая статистику по ковиду
-func CovidTask(bot *tgbotapi.BotAPI, db *gorm.DB, subscr models.Subscription, chatTgId int64) {
+func CovidTask(bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgId int64) {
 	var stat models.CovidStat
 
 	if result := db.First(&stat, "subscription_name = ?", subscr.Name); result.Error != nil {

@@ -225,7 +225,7 @@ func cmdUnsubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 }
 
 // cmdSubscription возвращает данные по подписке, без подписки
-func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdSubscription(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
 
 	if len(args) != 2 {
