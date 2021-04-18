@@ -6,6 +6,7 @@ import (
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/tools/testTools"
 	"github.com/stretchr/testify/assert"
+	"gorm.io/gorm"
 	"testing"
 )
 
@@ -193,4 +194,75 @@ func TestCndSubscribe(t *testing.T) {
 
 	assert.Equal(t, int64(85320), chatSubscr.Time)
 	assert.Equal(t, "23:42", chatSubscr.HumanTime)
+}
+
+// TestCmdUnsubscribeInvalid проверяет невалидные кейсы для команды отписки
+func TestCmdUnsubscribeInvalid(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+	cases := [...]struct {
+		Cmd       string
+		MsgText   string
+		ParseMode string
+	}{
+		{
+			"/unsubscribe",
+			"Чтобы отписаться от темы, отправьте команду в формате:\n" +
+				"/unsubscribe название_темы\n" +
+				"Например, так:\n" +
+				"/unsubscribe covid19-russia",
+			"",
+		},
+		{
+			"/unsubscribe no_exist_theme",
+			"Не нашёл в своих записях информации, что Вы подписаны по тему <b>no_exist_theme</b> :(",
+			"HTML",
+		},
+		{
+			"/unsubscribe covid19-russia",
+			"Не нашёл в своих записях информации, что Вы подписаны по тему <b>covid19-russia</b> :(",
+			"HTML",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
+			update := testTools.NewUpdate(c.Cmd)
+			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
+			expMsg.ParseMode = c.ParseMode
+			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			cmdUnsubscribe(update, botAPIMock, db)
+			botAPIMock.AssertExpectations(t)
+		})
+	}
+}
+
+// TestCmdUnsubscribe проверяет отписку от темы
+func TestCmdUnsubscribe(t *testing.T) {
+	db, _ := testTools.InitTestDB()
+
+	update := testTools.NewUpdate("/unsubscribe covid19-russia")
+
+	db.Create(&models.Chat{TgID: update.Message.Chat.ID})
+	chatSubscr := models.ChatSubscription{ChatID: update.Message.Chat.ID, SubscriptionID: 1}
+	db.Create(&chatSubscr)
+
+	expMsg := tgbotapi.NewMessage(
+		update.Message.Chat.ID,
+		"Успешно отписал Вас от темы с именем <b>covid19-russia</b>\nНа здоровье)",
+	)
+	expMsg.ParseMode = "HTML"
+	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	cmdUnsubscribe(update, botAPIMock, db)
+	botAPIMock.AssertExpectations(t)
+
+	// проверяем что подписка реально удалилась из базы
+	result := db.First(
+		&models.ChatSubscription{},
+		"chat_id = ? AND subscription_id = ?",
+		update.Message.Chat.ID,
+		1,
+	)
+
+	assert.EqualError(t, result.Error, gorm.ErrRecordNotFound.Error())
+
 }

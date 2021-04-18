@@ -176,7 +176,7 @@ func cmdSubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 }
 
 // cmdUnsubscribe отписывает пользователя
-func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdUnsubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
 
 	if len(args) != 2 {
@@ -212,16 +212,8 @@ func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 		_, _ = bot.Send(msg)
 		return
 	}
-	if result := db.Delete(&chatSubscr); result.Error != nil {
-		msg := tgbotapi.NewMessage(
-			update.Message.Chat.ID,
-			"Произошёл пожар в картотеке, не смог откорректировать свои записи :(\n"+
-				"Попробуйте, пожалуйста, позднее.",
-		)
-		msg.ReplyToMessageID = update.Message.MessageID
-		_, _ = bot.Send(msg)
-		return
-	}
+
+	db.Delete(&chatSubscr)
 
 	msg := tgbotapi.NewMessage(
 		update.Message.Chat.ID,
