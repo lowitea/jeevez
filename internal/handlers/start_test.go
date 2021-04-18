@@ -10,7 +10,7 @@ import (
 
 // TestStartHandler проверяет обработчки команды /start
 func TestStartHandler(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	db.Exec("DELETE FROM chats")
 
 	successMsg := "Приветствую! Я Ваш личный бот помощник. 🤵🏻\n" +
@@ -47,7 +47,7 @@ func TestStartHandler(t *testing.T) {
 
 // TestStartHandlerDBError проверяет работу хендлера при ошибке от базы данных
 func TestStartHandlerDBError(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	db.Exec("DROP TABLE chat_subscriptions")
 	db.Exec("DROP TABLE chats")
 

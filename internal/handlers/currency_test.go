@@ -41,7 +41,7 @@ func TestGetCurPair(t *testing.T) {
 func TestGetCurrencyRate(t *testing.T) {
 	curName := "USD_EUR"
 
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	db.Where("name = ?", curName).Delete(&models.CurrencyRate{})
 
 	rate, err := getCurrencyRate(db, curName)
@@ -61,7 +61,7 @@ func TestGetCurrencyRate(t *testing.T) {
 
 // TestGetMsgAllCurrencies тестирует функцию формирования сообщения со всеми доступными валютами
 func TestGetMsgAllCurrencies(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 
 	// проверяем работу с пустой базой
 	db.Exec("DELETE FROM currency_rates")
@@ -89,7 +89,7 @@ func TestGetMsgAllCurrencies(t *testing.T) {
 
 // TestCmdCurrencyRateAllRates получение списка всех валют
 func TestCmdCurrencyRateAllRates(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	update := testTools.NewUpdate("/currency_rate")
 
 	// сначала проверяем при пустой базе
@@ -121,7 +121,7 @@ func TestCmdCurrencyRateAllRates(t *testing.T) {
 
 // TestCmdCurrencyRateOneRate получение значение одной валютной пары
 func TestCmdCurrencyRateOneRate(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	update := testTools.NewUpdate("/currency_rate RUB_USD")
 
 	// пробуем получить несуществующую валюту
@@ -150,7 +150,7 @@ func TestCmdCurrencyRateOneRate(t *testing.T) {
 
 // TestCurrencyConverterHandler проверяет обработчик команд для валют
 func TestCurrencyConverterHandler(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	db.Exec("DELETE FROM currency_rates")
 	db.Create(&[...]models.CurrencyRate{
 		{Value: 77.425037, Name: "USD_RUB"},

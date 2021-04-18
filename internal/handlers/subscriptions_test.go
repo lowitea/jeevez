@@ -12,7 +12,7 @@ import (
 
 // TestCmdSubscriptions проверяет команду возращающую список подписок
 func TestCmdSubscriptions(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	db.Exec("DELETE FROM chat_subscriptions")
 	db.Exec("DELETE FROM chats")
 
@@ -106,7 +106,7 @@ func TestParseTimeInvalid(t *testing.T) {
 
 // TestCndSubscribeInvalid проверяем невалидные кейсы для команды подписки
 func TestCndSubscribeInvalid(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	cases := [...]struct {
 		Cmd       string
 		MsgText   string
@@ -152,7 +152,7 @@ func TestCndSubscribeInvalid(t *testing.T) {
 
 // TestCndSubscribe проверяем подписку
 func TestCndSubscribe(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 
 	update := testTools.NewUpdate("/subscribe covid19-russia 11:00")
 
@@ -198,7 +198,7 @@ func TestCndSubscribe(t *testing.T) {
 
 // TestCmdUnsubscribeInvalid проверяет невалидные кейсы для команды отписки
 func TestCmdUnsubscribeInvalid(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	cases := [...]struct {
 		Cmd       string
 		MsgText   string
@@ -238,7 +238,7 @@ func TestCmdUnsubscribeInvalid(t *testing.T) {
 
 // TestCmdUnsubscribe проверяет отписку от темы
 func TestCmdUnsubscribe(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 
 	update := testTools.NewUpdate("/unsubscribe covid19-russia")
 
@@ -268,7 +268,7 @@ func TestCmdUnsubscribe(t *testing.T) {
 
 // TestCmdSubscriptionInvalid проверяет невалидные кейсы для получения данных темы без подписки
 func TestCmdSubscriptionInvalid(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	cases := [...]struct {
 		Cmd     string
 		MsgText string
@@ -299,7 +299,7 @@ func TestCmdSubscriptionInvalid(t *testing.T) {
 
 // TestCmdSubscription проверяет команду получения данных темы без подписки
 func TestCmdSubscription(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	covidStat := models.CovidStat{
 		SubscriptionName: "covid19-moscow",
 		Confirmed:        10,
@@ -337,7 +337,7 @@ func TestCmdSubscription(t *testing.T) {
 
 // TestSubscriptionsHandler тестирует общий обработчик для команд управления подписками
 func TestSubscriptionsHandler(t *testing.T) {
-	db, _ := testTools.InitTestDB()
+	db := testTools.InitTestDB()
 	cases := [...]struct {
 		Cmd       string
 		MsgText   string
