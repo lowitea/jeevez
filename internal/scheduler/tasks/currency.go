@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-// доступные валютные пары, по которым запрашиваются данные
+// CurrencyPairs доступные валютные пары, по которым запрашиваются данные
 var CurrencyPairs = [...]string{
 	"USD_RUB",
 	"USD_EUR",
@@ -26,6 +26,7 @@ var CurrencyPairs = [...]string{
 	"EUR_RUB",
 }
 
+// getCurrencyRate получает валютные пары из апи
 func getCurrencyRate(url string) (float64, error) {
 	var body []byte
 
