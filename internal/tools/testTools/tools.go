@@ -1,6 +1,7 @@
 package testTools
 
 import (
+	"fmt"
 	"github.com/lowitea/jeevez/internal/tools"
 	"gorm.io/gorm"
 	"log"
@@ -22,8 +23,13 @@ func InitTestDB() *gorm.DB {
 		log.Fatalf("error init test db %s", err)
 	}
 
-	db.Exec("DROP SCHEMA public CASCADE")
-	db.Exec("CREATE SCHEMA public")
+	// очищаем существующую тестовую базу
+	clearQuery := fmt.Sprintf(""+
+		"select 'drop table if exists \"' || tablename || '\" cascade;' from pg_tables "+
+		"where schemaname = '%s'", testDBName)
+	if result := db.Exec(clearQuery); result.Error != nil {
+		log.Fatalf("error clear test db %s", result.Error)
+	}
 
 	// настраиваем базу
 	if err := tools.SetupDB(db); err != nil {

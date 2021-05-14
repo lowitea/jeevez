@@ -41,6 +41,7 @@ func TestGetMessage(t *testing.T) {
 // TestCovidTask проверяет таску отправки сообщения со статистикой ковида
 func TestCovidTask(t *testing.T) {
 	db := testTools.InitTestDB()
+	db.Exec("DELETE FROM covid_stats")
 
 	var chatId int64 = 1010
 	subscr := models.SubscrNameSubscrMap[testCovidStat.SubscriptionName]
