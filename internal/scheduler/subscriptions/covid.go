@@ -5,6 +5,7 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/structs"
+	"github.com/lowitea/jeevez/internal/tools"
 	"gorm.io/gorm"
 	"log"
 	"text/template"
@@ -34,9 +35,7 @@ func GetMessage(stat models.CovidStat) string {
 		template.New("msgTpl").Parse(msgTplString))
 
 	msg := bytes.Buffer{}
-	if err := msgTpl.Execute(&msg, Ctx{stat}); err != nil {
-		panic(err)
-	}
+	tools.Check(msgTpl.Execute(&msg, Ctx{stat}))
 
 	return msg.String()
 }

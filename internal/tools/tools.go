@@ -76,3 +76,9 @@ func InitDB(host string, port int, user string, pwd string, dbName string) (*gor
 
 	return db, err
 }
+
+func Check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
