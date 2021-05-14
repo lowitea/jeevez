@@ -141,6 +141,7 @@ func TestCndSubscribeInvalid(t *testing.T) {
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
 			update := testTools.NewUpdate(c.Cmd)
+			update.Message.Chat.ID = 666
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
 			expMsg.ParseMode = c.ParseMode
 			botAPIMock := testTools.NewBotAPIMock(expMsg)
@@ -150,11 +151,12 @@ func TestCndSubscribeInvalid(t *testing.T) {
 	}
 }
 
-// TestCndSubscribe проверяем подписку
-func TestCndSubscribe(t *testing.T) {
+// TestCmdSubscribe проверяем подписку
+func TestCmdSubscribe(t *testing.T) {
 	db := testTools.InitTestDB()
 
 	update := testTools.NewUpdate("/subscribe covid19-russia 11:00")
+	update.Message.Chat.ID = 777
 
 	chat := models.Chat{TgID: update.Message.Chat.ID}
 	db.Create(&chat)
@@ -227,6 +229,7 @@ func TestCmdUnsubscribeInvalid(t *testing.T) {
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
 			update := testTools.NewUpdate(c.Cmd)
+			update.Message.Chat.ID = 666
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
 			expMsg.ParseMode = c.ParseMode
 			botAPIMock := testTools.NewBotAPIMock(expMsg)
@@ -381,6 +384,7 @@ func TestSubscriptionsHandler(t *testing.T) {
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
 			update := testTools.NewUpdate(c.Cmd)
+			update.Message.Chat.ID = 666
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
 			expMsg.ParseMode = c.ParseMode
 			botAPIMock := testTools.NewBotAPIMock(expMsg)
