@@ -36,7 +36,7 @@ jobs:
 
     - name: Run autotests
       run: |
-        JEEVEZ_TEST_DB_HOST=postgres go test -parallel=1 -race -cover -coverprofile=coverage.out -covermode=atomic -v ./...
+        JEEVEZ_TEST_DB_HOST=postgres go test -parallel=1 -race -vet=off -cover -coverprofile=coverage.out -covermode=atomic -v -coverpkg=./... -count=1 ./...
         go tool cover -func=coverage.out
 
     - name: Upload coverage to Codecov
