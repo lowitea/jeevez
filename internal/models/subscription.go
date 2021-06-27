@@ -14,6 +14,8 @@ type Subscription struct {
 
 // ChatSubscription модель связи чата с подписками
 type ChatSubscription struct {
+	Chat           Chat
+	Subscription   Subscription
 	ChatID         int64     `gorm:"primaryKey"`
 	SubscriptionID int64     `gorm:"primaryKey"`
 	CreatedAt      time.Time `gorm:"autoUpdateTime"`
