@@ -9,7 +9,7 @@ import (
 func MigrateAll(db *gorm.DB) error {
 	log.Print("AutoMigrating has started")
 
-	err := db.AutoMigrate(
+	return db.AutoMigrate(
 		&CurrencyRate{},
 		&Chat{},
 		&Subscription{},
@@ -17,10 +17,4 @@ func MigrateAll(db *gorm.DB) error {
 		&CovidStat{},
 	)
 
-	if err == nil {
-		return nil
-	}
-
-	log.Printf("AutoMigrating error: %s", err)
-	return err
 }
