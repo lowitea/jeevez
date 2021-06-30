@@ -35,7 +35,7 @@ func TestInitConfig(t *testing.T) {
 			Port     int    `default:"5432"`
 			User     string `required:"true"`
 			Password string `required:"true"`
-			DBName   string `default:"jeevez"`
+			Name     string `default:"jeevez"`
 		}{"jeevez-database", 5432, "test_user", "db_password", "jeevez"},
 		CurrencyAPI: struct {
 			Token string `required:"true"`

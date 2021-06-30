@@ -43,7 +43,7 @@ func initApp(
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	// инициализация базы
-	db, err := tools.InitDB(cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName)
+	db, err := tools.InitDB(cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name)
 	if err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("error init database: %s", err)
 	}

@@ -21,7 +21,7 @@ func main() {
 	// инициализация базы
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d",
-		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.Port,
+		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.Name, cfg.DB.Port,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
