@@ -58,6 +58,15 @@ func initApp(
 	return &updates, bot, db, cfg, nil
 }
 
+// releaseNotify отправляет сообщение админу о деплое
+func releaseNotify(bot structs.Bot, adminID int64, version string) {
+	msg := tgbotapi.NewMessage(
+		adminID,
+		fmt.Sprintf("🤵🏻 Я обновился! :)\nМоя новая версия: %s", version),
+	)
+	_, _ = bot.Send(msg)
+}
+
 // Run функция запускающая бот
 func Run() {
 	updates, bot, db, cfg, err := initApp(tgbotapi.NewBotAPI)
@@ -65,12 +74,7 @@ func Run() {
 		log.Fatalf("error init app %s", err)
 	}
 
-	// отправляем инфу о запуске
-	msg := tgbotapi.NewMessage(
-		cfg.Telegram.Admin,
-		fmt.Sprintf("🤵🏻 Я обновился! :)\nМоя новая версия: %s", cfg.App.Version),
-	)
-	_, _ = bot.Send(msg)
+	releaseNotify(bot, cfg.Telegram.Admin, cfg.App.Version)
 
 	// запуск обработки сообщений
 	for update := range *updates {
