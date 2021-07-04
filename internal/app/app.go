@@ -28,9 +28,10 @@ func processUpdate(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 
 func initApp(
 	initBotFunc func(token string) (*tgbotapi.BotAPI, error),
-) (*tgbotapi.UpdatesChannel, structs.Bot, *gorm.DB, *config.Config, error) {
+	initCfgFunc func() (*config.Config, error),
+) (*tgbotapi.UpdateConfig, structs.Bot, *gorm.DB, *config.Config, error) {
 	// инициализируем конфиг
-	cfg, err := config.InitConfig()
+	cfg, err := initCfgFunc()
 	if err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("env parse error: %s", err)
 	}
@@ -51,11 +52,10 @@ func initApp(
 	// запуск фоновых задач
 	go scheduler.Run(bot, db)
 
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 1
-	updates, _ := bot.GetUpdatesChan(u)
+	updateCfg := tgbotapi.NewUpdate(0)
+	updateCfg.Timeout = 1
 
-	return &updates, bot, db, cfg, nil
+	return &updateCfg, bot, db, cfg, nil
 }
 
 // releaseNotify отправляет сообщение админу о деплое
@@ -69,15 +69,16 @@ func releaseNotify(bot structs.Bot, adminID int64, version string) {
 
 // Run функция запускающая бот
 func Run() {
-	updates, bot, db, cfg, err := initApp(tgbotapi.NewBotAPI)
+	updateCfg, bot, db, cfg, err := initApp(tgbotapi.NewBotAPI, config.InitConfig)
 	if err != nil {
 		log.Fatalf("error init app %s", err)
 	}
 
+	updates, _ := bot.GetUpdatesChan(*updateCfg)
 	releaseNotify(bot, cfg.Telegram.Admin, cfg.App.Version)
 
 	// запуск обработки сообщений
-	for update := range *updates {
+	for update := range updates {
 		processUpdate(update, bot, db)
 	}
 }
