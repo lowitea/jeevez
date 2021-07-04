@@ -15,22 +15,20 @@ func main() {
 	// инициализируем конфиг
 	cfg, err := config.InitConfig()
 	if err != nil {
-		log.Printf("env parse error %s", err)
-		os.Exit(1)
+		log.Fatalf("env parse error %s", err)
 	}
 
 	// инициализация базы
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d",
-		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.Port,
+		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.Name, cfg.DB.Port,
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Printf("failed to connect database: %s", err)
-		os.Exit(1)
+		log.Fatalf("failed to connect database: %s", err)
 	}
 
-	app := &cli.App{}
+	app := &cli.App{Usage: "A cli app for update date in Jeevez"}
 
 	app.Commands = []*cli.Command{
 		{

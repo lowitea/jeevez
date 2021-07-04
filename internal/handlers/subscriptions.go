@@ -7,23 +7,32 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/scheduler/subscriptions"
+	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 // cmdSubscriptions выводит список всех доступных подписок
-func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdSubscriptions(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	var msgTextB bytes.Buffer
 	msgTextB.WriteString("Все доступные темы для подписки:\n\n")
 
-	for subscr := range subscriptions.SubscriptionFuncMap {
+	// сортируем словарь подписок
+	var subscrsMapKeys []string
+	for k := range models.SubscrNameSubscrMap {
+		subscrsMapKeys = append(subscrsMapKeys, k)
+	}
+	sort.Strings(subscrsMapKeys)
+
+	for _, subscrKey := range subscrsMapKeys {
 		msgTextB.WriteString("<b>")
-		msgTextB.WriteString(subscr.Name)
+		msgTextB.WriteString(models.SubscrNameSubscrMap[subscrKey].Name)
 		msgTextB.WriteString("</b> - ")
-		msgTextB.WriteString(subscr.Description)
+		msgTextB.WriteString(models.SubscrNameSubscrMap[subscrKey].Description)
 		msgTextB.WriteString("\n")
 	}
 
@@ -33,7 +42,7 @@ func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB)
 	db.First(&chat, "tg_id = ?", update.Message.Chat.ID)
 
 	var chatSubscrs []models.ChatSubscription
-	db.Find(&chatSubscrs, "chat_id = ?", chat.ID)
+	db.Order("time, subscription_id").Find(&chatSubscrs, "chat_id = ?", chat.ID)
 
 	if len(chatSubscrs) > 0 {
 		msgTextB.WriteString("\nТемы на которые Вы подписаны:\n")
@@ -41,17 +50,13 @@ func cmdSubscriptions(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB)
 
 	for _, chatSubscr := range chatSubscrs {
 		var subscr models.Subscription
-		if result := db.First(&subscr, chatSubscr.SubscriptionID); result.Error != nil {
-			continue
-		}
+		db.First(&subscr, chatSubscr.SubscriptionID)
 
-		msgTextB.WriteString("\n")
-		msgTextB.WriteString("- <b>")
+		msgTextB.WriteString("\n- <b>")
 		msgTextB.WriteString(subscr.Name)
 		msgTextB.WriteString(" [")
 		msgTextB.WriteString(chatSubscr.HumanTime)
-		msgTextB.WriteString("]")
-		msgTextB.WriteString("</b> - ")
+		msgTextB.WriteString("]</b> - ")
 		msgTextB.WriteString(subscr.Description)
 	}
 
@@ -90,7 +95,7 @@ func parseTime(timeStr string) (int64, error) {
 }
 
 // cmdSubscribe подписывает чат на заданную рассылку
-func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdSubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
 
 	if len(args) != 3 {
@@ -113,7 +118,7 @@ func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	var ok bool
 
 	// если не нашли, отправляем сообщение и выходим
-	if subscr, ok = subscriptions.SubscrNameSubscrMap[subscrName]; !ok {
+	if subscr, ok = models.SubscrNameSubscrMap[subscrName]; !ok {
 		msg := tgbotapi.NewMessage(
 			update.Message.Chat.ID,
 			"К сожалению, такой темы не существует(\n"+
@@ -171,7 +176,7 @@ func cmdSubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 }
 
 // cmdUnsubscribe отписывает пользователя
-func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdUnsubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
 
 	if len(args) != 2 {
@@ -207,16 +212,8 @@ func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 		_, _ = bot.Send(msg)
 		return
 	}
-	if result := db.Delete(&chatSubscr); result.Error != nil {
-		msg := tgbotapi.NewMessage(
-			update.Message.Chat.ID,
-			"Произошёл пожар в картотеке, не смог откорректировать свои записи :(\n"+
-				"Попробуйте, пожалуйста, позднее.",
-		)
-		msg.ReplyToMessageID = update.Message.MessageID
-		_, _ = bot.Send(msg)
-		return
-	}
+
+	db.Delete(&chatSubscr)
 
 	msg := tgbotapi.NewMessage(
 		update.Message.Chat.ID,
@@ -228,7 +225,7 @@ func cmdUnsubscribe(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 }
 
 // cmdSubscription возвращает данные по подписке, без подписки
-func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdSubscription(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
 
 	if len(args) != 2 {
@@ -246,7 +243,7 @@ func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 
 	subscrName := args[1]
 
-	if subscr, ok := subscriptions.SubscrNameSubscrMap[subscrName]; ok {
+	if subscr, ok := models.SubscrNameSubscrMap[subscrName]; ok {
 		sFunc := subscriptions.SubscriptionFuncMap[subscr]
 		sFunc(bot, db, subscr, update.Message.Chat.ID)
 		return
@@ -261,7 +258,7 @@ func cmdSubscription(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 }
 
 // SubscriptionsHandler обработчик для команд подписок
-func SubscriptionsHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func SubscriptionsHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	if update.Message.Text == "/subscriptions" {
 		cmdSubscriptions(update, bot, db)
 	} else if strings.HasPrefix(update.Message.Text, "/subscribe") {

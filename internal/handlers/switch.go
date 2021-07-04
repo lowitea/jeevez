@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/lowitea/jeevez/internal/structs"
 	"strings"
 )
 
@@ -87,7 +88,7 @@ func getSwitchFunc(text string) func(letter string) string {
 }
 
 // cmdSwitch меняет раскладку текста
-func SwitchHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func SwitchHandler(update tgbotapi.Update, bot structs.Bot) {
 	isSwitchCommand := strings.HasPrefix(
 		update.Message.Text, "/switch") || strings.HasPrefix(update.Message.Text, ".ыцшеср")
 

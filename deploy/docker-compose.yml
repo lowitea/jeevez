@@ -14,6 +14,6 @@ services:
       - JEEVEZ_DB_PORT
       - JEEVEZ_DB_USER
       - JEEVEZ_DB_PASSWORD
-      - JEEVEZ_DB_DBNAME
+      - JEEVEZ_DB_NAME
 
       - JEEVEZ_CURRENCYAPI_TOKEN

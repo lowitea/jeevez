@@ -7,6 +7,19 @@ jobs:
     runs-on: ubuntu-latest
     container: golang:1.14
 
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: jeevez_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
     - uses: actions/checkout@v2
 
@@ -23,8 +36,19 @@ jobs:
 
     - name: Run autotests
       run: |
-        go test -race -cover -coverprofile=coverage.out -v ./...
+        JEEVEZ_TEST_DB_HOST=postgres \
+        JEEVEZ_TEST_DB_USER=test \
+        JEEVEZ_TEST_DB_PASSWORD=test \
+        JEEVEZ_TEST_DB_NAME=jeevez_test \
+        go test -parallel=1 -race -vet=off -cover -coverprofile=coverage.out -covermode=atomic -v -coverpkg=./... -count=1 ./...
         go tool cover -func=coverage.out
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CI_CODECOV_TOKEN }}
+        file: ./coverage.out
+        fail_ci_if_error: true
 
   style-check:
     runs-on: ubuntu-latest

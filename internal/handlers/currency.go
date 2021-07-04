@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
+	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
 	"log"
 	"regexp"
@@ -26,6 +27,7 @@ func getCurrencyRate(db *gorm.DB, curPair string) (float64, error) {
 	return currencyRate.Value, nil
 }
 
+// getCurPair функция принимающая введённые пользователем названия валют и возвращающая имя пары
 func getCurPair(firstCur string, secCur string) string {
 	var firstElem string
 	var secElem string
@@ -53,29 +55,43 @@ func getCurPair(firstCur string, secCur string) string {
 	return fmt.Sprintf("%s_%s", firstElem, secElem)
 }
 
+// getMsgAllCurrencies формирует сообщение со списком всех валют
+func getMsgAllCurrencies(db *gorm.DB) (msgText string, err error) {
+	var curRates []models.CurrencyRate
+	result := db.Find(&curRates)
+	if result.Error != nil {
+		log.Printf("getting currencies from db error: %s", result.Error)
+		return "", result.Error
+	}
+
+	if len(curRates) == 0 {
+		log.Printf("none rates")
+		return "", errors.New("none rates")
+	}
+
+	var msgTextB bytes.Buffer
+	msgTextB.WriteString("Курсы всех доступных валютных пар:\n\n")
+
+	for _, curRate := range curRates {
+		msgTextB.WriteString(curRate.Name)
+		msgTextB.WriteString(fmt.Sprintf(":    %.6f", curRate.Value))
+		msgTextB.WriteString("\n")
+	}
+	return msgTextB.String(), nil
+}
+
 // cmdCurrencyRate команда /currency_rate показывает доступные пары валют или курс по конкретной паре
-func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+func cmdCurrencyRate(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	args := strings.Split(update.Message.Text, " ")
+
 	var msgText string
 
 	// команда пришла без параметров, отправляем список валют
 	if len(args) == 1 {
-		var curRates []models.CurrencyRate
-		result := db.Find(&curRates)
-		if result.Error != nil {
-			log.Printf("getting currencies from db error: %s", result.Error)
-			msgText = "Я прошу прощения. Биржа не отвечает по телефону." +
+		msgText, err := getMsgAllCurrencies(db)
+		if err != nil {
+			msgText = "Я прошу прощения. Биржа не отвечает по телефону. " +
 				"Попробуйте уточнить у меня список валют позднее."
-		} else {
-			var msgTextB bytes.Buffer
-			msgTextB.WriteString("Курсы всех доступных валютных пар:\n\n")
-
-			for _, curRate := range curRates {
-				msgTextB.WriteString(curRate.Name)
-				msgTextB.WriteString(fmt.Sprintf(":    %.6f", curRate.Value))
-				msgTextB.WriteString("\n")
-			}
-			msgText = msgTextB.String()
 		}
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
@@ -101,12 +117,8 @@ func cmdCurrencyRate(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) 
 	_, _ = bot.Send(msg)
 }
 
-func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
-	// выходим сразу, если сообщения нет
-	if update.Message == nil {
-		return
-	}
-
+// CurrencyConverterHandler обрабатывает команды конвертации валют
+func CurrencyConverterHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	if strings.HasPrefix(update.Message.Text, "/currency_rate") {
 		cmdCurrencyRate(update, bot, db)
 		return
@@ -125,6 +137,8 @@ func CurrencyConverterHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *
 	currencyPair := getCurPair(tokens[2], tokens[3])
 
 	var result float64
+
+	// если вернулась пустая строка, значит валюты одинаковые и нужно вернуть тоже значение, что ввели
 	if currencyPair == "" {
 		result = value
 	} else {

@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/lowitea/jeevez/internal/structs"
 	"github.com/wayneashleyberry/eeemo/pkg/zalgo"
+	"sort"
 	"strings"
 )
 
@@ -96,7 +98,7 @@ var decorateFuncMap = map[string]struct {
 }
 
 // DecorateTextHandler команда /decorate для разных украшательств текста
-func DecorateTextHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
+func DecorateTextHandler(update tgbotapi.Update, bot structs.Bot) {
 	if !strings.HasPrefix(update.Message.Text, "/decorate") {
 		return
 	}
@@ -104,12 +106,17 @@ func DecorateTextHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	args := strings.SplitN(update.Message.Text, " ", 3)
 
 	if len(args) != 3 {
+		var commands []string
+		for cmdName := range decorateFuncMap {
+			commands = append(commands, cmdName)
+		}
+		sort.Strings(commands)
 		var listCommandsB bytes.Buffer
-		for decorName, decorConf := range decorateFuncMap {
+		for _, cmdName := range commands {
 			listCommandsB.WriteString("\n  <b>")
-			listCommandsB.WriteString(decorName)
+			listCommandsB.WriteString(cmdName)
 			listCommandsB.WriteString("</b> - ")
-			listCommandsB.WriteString(decorConf.Description)
+			listCommandsB.WriteString(decorateFuncMap[cmdName].Description)
 		}
 		msg := tgbotapi.NewMessage(
 			update.Message.Chat.ID,
@@ -128,14 +135,13 @@ func DecorateTextHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
 	decorName, text := args[1], args[2]
 
 	decorateConf, ok := decorateFuncMap[decorName]
+	var msgText string
 	if !ok {
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "К сожалению, такому меня не учили ):")
-		msg.ReplyToMessageID = update.Message.MessageID
-		_, _ = bot.Send(msg)
-		return
+		msgText = "К сожалению, такому меня не учили ):"
+	} else {
+		msgText = decorateConf.Func(text)
 	}
-	decoratedText := decorateConf.Func(text)
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, decoratedText)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 	msg.ReplyToMessageID = update.Message.MessageID
 	_, _ = bot.Send(msg)
 }
