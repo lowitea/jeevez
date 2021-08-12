@@ -10,7 +10,7 @@ import (
 )
 
 // InitSubscriptions создаёт в базе недостающие подписки
-func InitSubscriptions(db *gorm.DB) error {
+func InitSubscriptions(db *gorm.DB) {
 	log.Print("InitSubscriptions has started")
 	for _, subscr := range models.SubscrNameSubscrMap {
 		// пытаемся получить подписку из базы по id и name
@@ -26,12 +26,12 @@ func InitSubscriptions(db *gorm.DB) error {
 			// создаём новую запись
 			if result = db.Create(&subscr); result.Error != nil {
 				log.Printf("create Subscription error: %s", result.Error)
-				return result.Error
+				panic(result.Error)
 			}
 			continue
 		} else if result.Error != nil {
 			log.Printf("update Subscription error: %s", result.Error)
-			return result.Error
+			panic(result.Error)
 		}
 
 		// обновляем запись если отличаются другие поля
@@ -39,7 +39,6 @@ func InitSubscriptions(db *gorm.DB) error {
 			db.Save(&subscr)
 		}
 	}
-	return nil
 }
 
 // ConnectDB открываем коннект к базе данных
@@ -49,17 +48,12 @@ func ConnectDB(host string, port int, user string, pwd string, dbName string) (*
 }
 
 // SetupDB подготавливаем данные в базе
-func SetupDB(db *gorm.DB) error {
+func SetupDB(db *gorm.DB) {
 	// миграция моделей
-	if err := models.MigrateAll(db); err != nil {
-		return err
-	}
+	models.MigrateAll(db)
 
 	// инициализация вариантов подписок
-	if err := InitSubscriptions(db); err != nil {
-		return err
-	}
-	return nil
+	InitSubscriptions(db)
 }
 
 // InitDB инициализируем продовую базу данных
@@ -70,9 +64,7 @@ func InitDB(host string, port int, user string, pwd string, dbName string) (*gor
 	}
 
 	// настраиваем базу
-	if err := SetupDB(db); err != nil {
-		return nil, err
-	}
+	SetupDB(db)
 
 	return db, err
 }

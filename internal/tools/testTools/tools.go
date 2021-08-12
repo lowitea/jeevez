@@ -32,9 +32,7 @@ func InitTestDB() *gorm.DB {
 	}
 
 	// настраиваем базу
-	if err := tools.SetupDB(db); err != nil {
-		log.Fatalf("error init test db %s", err)
-	}
+	tools.SetupDB(db)
 
 	return db
 }
