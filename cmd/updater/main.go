@@ -1,32 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/scheduler/tasks"
+	"github.com/lowitea/jeevez/internal/tools"
 	"github.com/urfave/cli/v2"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 	"log"
 	"os"
 )
 
-func main() {
+func initApp(initCfgFunc func() (*config.Config, error)) *cli.App {
 	// инициализируем конфиг
-	cfg, err := config.InitConfig()
+	cfg, err := initCfgFunc()
 	if err != nil {
 		log.Fatalf("env parse error %s", err)
 	}
 
-	// инициализация базы
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d",
-		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.Name, cfg.DB.Port,
-	)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("failed to connect database: %s", err)
-	}
+	db, err := tools.ConnectDB(cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name)
 
 	app := &cli.App{Usage: "A cli app for update date in Jeevez"}
 
@@ -49,7 +39,12 @@ func main() {
 		},
 	}
 
-	if err = app.Run(os.Args); err != nil {
+	return app
+}
+
+func main() {
+	app := initApp(config.InitConfig)
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
