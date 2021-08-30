@@ -17,6 +17,9 @@ func initApp(initCfgFunc func() (*config.Config, error)) *cli.App {
 	}
 
 	db, err := tools.ConnectDB(cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name)
+	if err != nil {
+		log.Fatalf("db connect error %s", err)
+	}
 
 	app := &cli.App{Usage: "A cli app for update date in Jeevez"}
 
