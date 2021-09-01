@@ -67,6 +67,10 @@ func getCurrencyRate(url string) (float64, error) {
 // CurrencyTask таска обновляющая курсы валют в базе
 func CurrencyTask(db *gorm.DB) {
 	log.Printf("CurrencyTask has started")
+	if db == nil {
+		log.Printf("db is nil")
+		return
+	}
 	baseUrl := url2.URL{
 		Scheme: config.CurrencyApiScheme,
 		Host:   config.CurrencyApiHost,
