@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var httpGet = http.Get
+
 // covidStat структура с ответом от апи статистки по ковиду
 type covidStat struct {
 	Confirmed     int64   `json:"confirmed"`
@@ -52,7 +54,7 @@ func getData(url string) ([]covidStat, error) {
 		Data []covidStat
 	}
 
-	resp, err := http.Get(url)
+	resp, err := httpGet(url)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
 		return nil, err
