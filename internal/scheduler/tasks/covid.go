@@ -141,17 +141,13 @@ func CovidTask(db *gorm.DB) {
 		var statDB models.CovidStat
 		result := db.First(&statDB, "subscription_name = ?", statName)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			if result := db.Create(&stat); result.Error != nil {
-				log.Printf("create CovidStat error: %s", result.Error)
-			}
+			db.Create(&stat)
 		} else if result.Error != nil {
 			log.Printf("getting CovidStat from db error: %s", result.Error)
 			return
 		} else {
 			stat.ID = statDB.ID
-			if result := db.Save(&stat); result.Error != nil {
-				log.Printf("update CovidStat error: %s", result.Error)
-			}
+			db.Save(&stat)
 		}
 	}
 }
