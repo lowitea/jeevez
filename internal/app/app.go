@@ -71,7 +71,7 @@ func releaseNotify(bot structs.Bot, adminID int64, version string) {
 func Run() {
 	updateCfg, bot, db, cfg, err := initApp(tgbotapi.NewBotAPI, config.InitConfig)
 	if err != nil {
-		log.Fatalf("error init app %s", err)
+		log.Panicf("error init app %s\n", err)
 	}
 
 	updates, _ := bot.GetUpdatesChan(*updateCfg)

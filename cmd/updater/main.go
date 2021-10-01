@@ -43,6 +43,6 @@ func initApp(initCfgFunc func() (*config.Config, error)) *cli.App {
 
 func main() {
 	if err := initApp(config.InitConfig).Run(os.Args); err != nil {
-		log.Fatal(err)
+		log.Panicln(err)
 	}
 }
