@@ -81,7 +81,7 @@ func TestGetData(t *testing.T) {
 	}}
 	httpGet = func(_ string) (*http.Response, error) { return &resp, nil }
 	stat, err = getData("")
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 	expStat := []covidStat{
 		{
 			Confirmed:     976739,
@@ -97,4 +97,43 @@ func TestGetData(t *testing.T) {
 		},
 	}
 	assert.Equal(t, expStat, stat)
+}
+
+// TestGetStat тестирует функцию получения статистики
+func TestGetStat(t *testing.T) {
+	defer func(f func(url string) (resp *http.Response, err error)) { httpGet = f }(httpGet)
+
+	httpGet = func(_ string) (*http.Response, error) { return nil, errors.New("test") }
+	stat, err := getStat("")
+	assert.Nil(t, stat)
+	assert.EqualError(t, err, "getting covid stats error: test")
+
+	resp := http.Response{Body: fakeBody{content: `{"data":[]}`}}
+	httpGet = func(_ string) (*http.Response, error) { return &resp, nil }
+	stat, err = getStat("")
+	assert.Nil(t, stat)
+	assert.EqualError(t, err, "getting covid stats error")
+
+	resp = http.Response{Body: fakeBody{
+		content: `{"data":[{"date":"2021-02-27","confirmed":976739,"deaths":15007,"recovered":895879,` +
+			`"confirmed_diff":1825,"deaths_diff":41,"recovered_diff":2008,"last_update":"2021-02-28 05:22:20",` +
+			`"active":65853,"active_diff":-224,"fatality_rate":0.0154,"region":{"iso":"RUS","name":"Russia",` +
+			`"province":"Moscow","lat":"55.7504461","long":"37.6174943","cities":[]}}]}`,
+	}}
+	httpGet = func(_ string) (*http.Response, error) { return &resp, nil }
+	stat, err = getStat("")
+	expStat := covidStat{
+		Confirmed:     976739,
+		Deaths:        15007,
+		Recovered:     895879,
+		ConfirmedDiff: 1825,
+		DeathsDiff:    41,
+		RecoveredDiff: 2008,
+		LastUpdate:    "2021-02-28 05:22:20",
+		Active:        65853,
+		ActiveDiff:    -224,
+		FatalityRate:  0.0154,
+	}
+	assert.Equal(t, &expStat, stat)
+	assert.NoError(t, err)
 }
