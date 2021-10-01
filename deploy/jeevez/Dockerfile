@@ -7,15 +7,16 @@ ADD ./go.mod \
     /build/
 WORKDIR /build
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o main ./cmd/jeevez/main.go
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o updater ./cmd/updater/main.go
+ENV GOOS=linux
+RUN go build -o jeevez ./cmd/jeevez/main.go
+RUN go build -o updater ./cmd/updater/main.go
 
 FROM debian:buster
 ARG JEEVEZ_APP_VERSION
 ENV JEEVEZ_APP_VERSION=${JEEVEZ_APP_VERSION}
 # for debug
 RUN apt-get update && apt-get install curl -yqq
-COPY --from=builder /build/main /app/
+COPY --from=builder /build/jeevez /app/
 COPY --from=builder /build/updater /app/
 WORKDIR /app
-CMD ["./main"]
+CMD ["./jeevez"]

@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
+	"github.com/lowitea/jeevez/internal/structs"
+	"github.com/lowitea/jeevez/internal/tools"
 	"gorm.io/gorm"
 	"log"
 	"text/template"
@@ -33,15 +35,13 @@ func GetMessage(stat models.CovidStat) string {
 		template.New("msgTpl").Parse(msgTplString))
 
 	msg := bytes.Buffer{}
-	if err := msgTpl.Execute(&msg, Ctx{stat}); err != nil {
-		panic(err)
-	}
+	tools.Check(msgTpl.Execute(&msg, Ctx{stat}))
 
 	return msg.String()
 }
 
 // CovidTask таска рассылающая статистику по ковиду
-func CovidTask(bot *tgbotapi.BotAPI, db *gorm.DB, subscr models.Subscription, chatTgId int64) {
+func CovidTask(bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgId int64) {
 	var stat models.CovidStat
 
 	if result := db.First(&stat, "subscription_name = ?", subscr.Name); result.Error != nil {

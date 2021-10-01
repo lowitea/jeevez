@@ -14,7 +14,7 @@ import (
 	"strconv"
 )
 
-// доступные валютные пары, по которым запрашиваются данные
+// CurrencyPairs доступные валютные пары, по которым запрашиваются данные
 var CurrencyPairs = [...]string{
 	"USD_RUB",
 	"USD_EUR",
@@ -26,6 +26,7 @@ var CurrencyPairs = [...]string{
 	"EUR_RUB",
 }
 
+// getCurrencyRate получает валютные пары из апи
 func getCurrencyRate(url string) (float64, error) {
 	var body []byte
 
@@ -66,6 +67,10 @@ func getCurrencyRate(url string) (float64, error) {
 // CurrencyTask таска обновляющая курсы валют в базе
 func CurrencyTask(db *gorm.DB) {
 	log.Printf("CurrencyTask has started")
+	if db == nil {
+		log.Printf("db is nil")
+		return
+	}
 	baseUrl := url2.URL{
 		Scheme: config.CurrencyApiScheme,
 		Host:   config.CurrencyApiHost,

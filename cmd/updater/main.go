@@ -1,57 +1,48 @@
 package main
 
 import (
-	"fmt"
 	"github.com/lowitea/jeevez/internal/config"
-	"github.com/lowitea/jeevez/internal/scheduler/tasks"
+	"github.com/lowitea/jeevez/internal/tools"
 	"github.com/urfave/cli/v2"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
 	"os"
 )
 
-func main() {
+var db *gorm.DB
+
+func initApp(initCfgFunc func() (*config.Config, error)) *cli.App {
 	// инициализируем конфиг
-	cfg, err := config.InitConfig()
+	cfg, err := initCfgFunc()
 	if err != nil {
-		log.Printf("env parse error %s", err)
-		os.Exit(1)
+		log.Panicf("env parse error %s", err)
 	}
 
-	// инициализация базы
-	dsn := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%d",
-		cfg.DB.Host, cfg.DB.User, cfg.DB.Password, cfg.DB.DBName, cfg.DB.Port,
-	)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err = tools.ConnectDB(cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name)
 	if err != nil {
-		log.Printf("failed to connect database: %s", err)
-		os.Exit(1)
+		log.Panicf("db connect error %s", err)
 	}
 
-	app := &cli.App{}
+	app := &cli.App{Usage: "A cli app for update date in Jeevez"}
 
 	app.Commands = []*cli.Command{
 		{
-			Name:  "covid",
-			Usage: "update covid19 stat",
-			Action: func(c *cli.Context) error {
-				tasks.CovidTask(db)
-				return nil
-			},
+			Name:   "covid",
+			Usage:  "update covid19 stat",
+			Action: covid,
 		},
 		{
-			Name:  "currency",
-			Usage: "update currency stat",
-			Action: func(c *cli.Context) error {
-				tasks.CurrencyTask(db)
-				return nil
-			},
+			Name:   "currency",
+			Usage:  "update currency stat",
+			Action: currency,
 		},
 	}
 
-	if err = app.Run(os.Args); err != nil {
+	return app
+}
+
+func main() {
+	if err := initApp(config.InitConfig).Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }

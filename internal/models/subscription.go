@@ -14,6 +14,8 @@ type Subscription struct {
 
 // ChatSubscription модель связи чата с подписками
 type ChatSubscription struct {
+	Chat           Chat
+	Subscription   Subscription
 	ChatID         int64     `gorm:"primaryKey"`
 	SubscriptionID int64     `gorm:"primaryKey"`
 	CreatedAt      time.Time `gorm:"autoUpdateTime"`
@@ -23,4 +25,17 @@ type ChatSubscription struct {
 
 func (ChatSubscription) BeforeCreate(db *gorm.DB) error {
 	return db.SetupJoinTable(&Chat{}, "Subscriptions", &ChatSubscription{})
+}
+
+var SubscrNameSubscrMap = map[string]Subscription{
+	"covid19-russia": {
+		ID:          1,
+		Name:        "covid19-russia",
+		Description: "Дневная статистика по COViD-19 по России",
+	},
+	"covid19-moscow": {
+		ID:          2,
+		Name:        "covid19-moscow",
+		Description: "Дневная статистика по COViD-19 по Москве",
+	},
 }

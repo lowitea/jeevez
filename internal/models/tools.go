@@ -1,32 +1,26 @@
 package models
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 	"log"
 )
 
+var autoMigrate = (*gorm.DB).AutoMigrate
+
 // MigrateAll выполняет автомиграцию базы данных
-func MigrateAll(db *gorm.DB) error {
+func MigrateAll(db *gorm.DB) {
 	log.Print("AutoMigrating has started")
-	if err := db.AutoMigrate(&CurrencyRate{}); err != nil {
-		log.Printf("migrating CurrencyRate error: %s", err)
-		return err
+
+	err := autoMigrate(
+		db,
+		&CurrencyRate{},
+		&Chat{},
+		&Subscription{},
+		&ChatSubscription{},
+		&CovidStat{},
+	)
+	if err != nil {
+		panic(fmt.Sprintf("AutoMigrating failed: %s", err))
 	}
-	if err := db.AutoMigrate(&Chat{}); err != nil {
-		log.Printf("migrating Chat error: %s", err)
-		return err
-	}
-	if err := db.AutoMigrate(&Subscription{}); err != nil {
-		log.Printf("migrating Subscription error: %s", err)
-		return err
-	}
-	if err := db.AutoMigrate(&ChatSubscription{}); err != nil {
-		log.Printf("migrating ChatSubscription error: %s", err)
-		return err
-	}
-	if err := db.AutoMigrate(&CovidStat{}); err != nil {
-		log.Printf("migrating CovidStat error: %s", err)
-		return err
-	}
-	return nil
 }

@@ -106,6 +106,10 @@ func getStat(url string) (*covidStat, error) {
 // CovidTask таска рассылающая статистику по ковиду
 func CovidTask(db *gorm.DB) {
 	log.Printf("CovidTask has started")
+	if db == nil {
+		log.Printf("db is nil")
+		return
+	}
 
 	for statName, statConf := range subscrUrlMap {
 		respStat, err := getStat(statConf.UrlTpl)

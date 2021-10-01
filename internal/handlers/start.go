@@ -3,12 +3,14 @@ package handlers
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
+	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"log"
 )
 
-func StartHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
+// StartHandler обрабатывает команду /start добавляет чатик в базу
+func StartHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	if update.Message.Text != "/start" {
 		return
 	}
@@ -19,7 +21,7 @@ func StartHandler(update tgbotapi.Update, bot *tgbotapi.BotAPI, db *gorm.DB) {
 	if result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&chat); result.Error != nil {
 		log.Printf("create User error: %s", result.Error)
 		msgText = msgText +
-			"К сожалению, не получилось Вас зарегистрировать," +
+			"К сожалению, не получилось Вас зарегистрировать, " +
 			"попробуйте пожалуйста позже, с помощью команды /start ):"
 	} else {
 		msgText = msgText +
