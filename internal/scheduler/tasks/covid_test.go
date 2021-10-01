@@ -53,7 +53,7 @@ func (b fakeBody) Read(p []byte) (n int, err error) {
 	return len(c), err
 }
 
-var validResp = http.Response{Body: fakeBody{
+var validCovidResp = http.Response{Body: fakeBody{
 	content: `{"data":[{"date":"2021-02-27","confirmed":976739,"deaths":15007,"recovered":895879,` +
 		`"confirmed_diff":1825,"deaths_diff":41,"recovered_diff":2008,"last_update":"2021-02-28 05:22:20",` +
 		`"active":65853,"active_diff":-224,"fatality_rate":0.0154,"region":{"iso":"RUS","name":"Russia",` +
@@ -95,7 +95,7 @@ func TestGetData(t *testing.T) {
 	assert.Nil(t, stat)
 	assert.IsType(t, &json.SyntaxError{}, err)
 
-	httpGet = func(_ string) (*http.Response, error) { return &validResp, nil }
+	httpGet = func(_ string) (*http.Response, error) { return &validCovidResp, nil }
 	stat, err = getData("")
 	assert.NoError(t, err)
 	expStat := []covidStat{validStat}
@@ -117,7 +117,7 @@ func TestGetStat(t *testing.T) {
 	assert.Nil(t, stat)
 	assert.EqualError(t, err, "getting covid stats error")
 
-	httpGet = func(_ string) (*http.Response, error) { return &validResp, nil }
+	httpGet = func(_ string) (*http.Response, error) { return &validCovidResp, nil }
 	stat, err = getStat("")
 	assert.Equal(t, &validStat, stat)
 	assert.NoError(t, err)
@@ -138,7 +138,7 @@ func TestCovidTask(t *testing.T) {
 	assert.NotPanics(t, func() { CovidTask(db) })
 
 	// проверяем запись в пустую базу
-	httpGet = func(_ string) (*http.Response, error) { return &validResp, nil }
+	httpGet = func(_ string) (*http.Response, error) { return &validCovidResp, nil }
 	CovidTask(db)
 
 	var stats []models.CovidStat

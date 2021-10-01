@@ -8,11 +8,8 @@ import (
 	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"time"
 )
-
-var httpGet = http.Get
 
 // covidStat структура с ответом от апи статистки по ковиду
 type covidStat struct {

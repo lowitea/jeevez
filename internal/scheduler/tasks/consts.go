@@ -1,5 +1,7 @@
 package tasks
 
+import "net/http"
+
 type subscrConf struct {
 	HumanName string
 	UrlTpl    string
@@ -15,3 +17,5 @@ var subscrUrlMap = map[string]subscrConf{
 		UrlTpl:    "https://covid-api.com/api/reports?date=%s&iso=rus",
 	},
 }
+
+var httpGet = http.Get
