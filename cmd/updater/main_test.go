@@ -26,16 +26,16 @@ func TestRunner(t *testing.T) {
 			Token string `required:"true"`
 		}{"1"},
 	}
-	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_HOST"); ok == true {
+	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_HOST"); ok {
 		testCfg.DB.Host = val
 	}
-	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_USER"); ok == true {
+	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_USER"); ok {
 		testCfg.DB.User = val
 	}
-	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_PASSWORD"); ok == true {
+	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_PASSWORD"); ok {
 		testCfg.DB.Password = val
 	}
-	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_NAME"); ok == true {
+	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_NAME"); ok {
 		testCfg.DB.Name = val
 	}
 
@@ -51,4 +51,50 @@ func TestRunner(t *testing.T) {
 	// ошибка инициализации базы
 	testCfg.DB.Host = `not_host`
 	assert.Panics(t, func() { initApp(func() (*config.Config, error) { return &testCfg, nil }) })
+}
+
+// TestMainFunc смок тест на ошибку в основной функции запуска cli
+func TestMainFunc(t *testing.T) {
+	for _, envName := range [...]string{
+		"JEEVEZ_TELEGRAM_TOKEN",
+		"JEEVEZ_TELEGRAM_ADMIN",
+		"JEEVEZ_CURRENCYAPI_TOKEN",
+	} {
+		if _, ok := os.LookupEnv(envName); !ok {
+			_ = os.Setenv(envName, "1")
+			defer func() { _ = os.Unsetenv(envName) }()
+		}
+	}
+
+	if val, ok := os.LookupEnv("JEEVEZ_DB_USER"); ok {
+		defer func(val string) { _ = os.Setenv("JEEVEZ_DB_USER", val) }(val)
+	}
+
+	if val, ok := os.LookupEnv("JEEVEZ_DB_PASSWORD"); ok {
+		defer func(val string) { _ = os.Setenv("JEEVEZ_DB_PASSWORD", val) }(val)
+	}
+
+	if val, ok := os.LookupEnv("JEEVEZ_DB_HOST"); ok {
+		defer func(val string) { _ = os.Setenv("JEEVEZ_DB_HOST", val) }(val)
+	}
+
+	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_USER"); ok {
+		_ = os.Setenv("JEEVEZ_DB_USER", val)
+	} else {
+		_ = os.Setenv("JEEVEZ_DB_USER", "test")
+	}
+
+	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_PASSWORD"); ok {
+		_ = os.Setenv("JEEVEZ_DB_PASSWORD", val)
+	} else {
+		_ = os.Setenv("JEEVEZ_DB_PASSWORD", "test")
+	}
+
+	if val, ok := os.LookupEnv("JEEVEZ_TEST_DB_HOST"); ok {
+		_ = os.Setenv("JEEVEZ_DB_HOST", val)
+	} else {
+		_ = os.Setenv("JEEVEZ_DB_HOST", "localhost")
+	}
+
+	assert.Panics(t, main)
 }
