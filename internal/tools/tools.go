@@ -20,14 +20,11 @@ func InitSubscriptions(db *gorm.DB) {
 		// если такого не нашлось, создаём
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			// так как у нас захардкожены id в коде, нужно попробовать удалить из базы запись с таким id
-			_ = db.Delete(&models.ChatSubscription{}, "subscription_id = ?", subscr.ID)
-			_ = db.Delete(&models.Subscription{}, subscr.ID)
+			db.Delete(&models.ChatSubscription{}, "subscription_id = ?", subscr.ID)
+			db.Delete(&models.Subscription{}, subscr.ID)
 
 			// создаём новую запись
-			if result = db.Create(&subscr); result.Error != nil {
-				log.Printf("create Subscription error: %s", result.Error)
-				panic(result.Error)
-			}
+			db.Create(&subscr)
 			continue
 		} else if result.Error != nil {
 			log.Printf("update Subscription error: %s", result.Error)
