@@ -8,8 +8,7 @@ import (
 	"gorm.io/gorm"
 	"io/ioutil"
 	"log"
-	"net/http"
-	url2 "net/url"
+	"net/url"
 	"regexp"
 	"strconv"
 )
@@ -27,10 +26,10 @@ var CurrencyPairs = [...]string{
 }
 
 // getCurrencyRate получает валютные пары из апи
-func getCurrencyRate(url string) (float64, error) {
+func getCurrencyRate(targetURL string) (float64, error) {
 	var body []byte
 
-	resp, err := http.Get(url)
+	resp, err := httpGet(targetURL)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
 		return 0, err
@@ -46,20 +45,16 @@ func getCurrencyRate(url string) (float64, error) {
 
 	bodyStr := string(body)
 
-	tpl := regexp.MustCompile(`{"\w{3}_\w{3}":(\d+.\d+)}`)
+	tpl := regexp.MustCompile(`{"\w{3}_\w{3}":(\d+\.\d+)}`)
 	parsedBody := tpl.FindStringSubmatch(bodyStr)
 
 	if len(parsedBody) < 2 {
 		log.Printf("Error parsed currency api.\nBody: %s", bodyStr)
-		return 0, err
+		return 0, errors.New("error parsed currency api")
 	}
 
 	rateStr := parsedBody[1]
-	rate, err := strconv.ParseFloat(rateStr, 64)
-	if err != nil {
-		log.Printf("Error get data: %s", err)
-		return 0, err
-	}
+	rate, _ := strconv.ParseFloat(rateStr, 64)
 
 	return rate, nil
 }
@@ -71,7 +66,7 @@ func CurrencyTask(db *gorm.DB) {
 		log.Printf("db is nil")
 		return
 	}
-	baseUrl := url2.URL{
+	baseUrl := url.URL{
 		Scheme: config.CurrencyApiScheme,
 		Host:   config.CurrencyApiHost,
 		Path:   config.CurrencyApiPath,
@@ -94,7 +89,7 @@ func CurrencyTask(db *gorm.DB) {
 		result := db.First(&currencyRate, "name = ?", curPair)
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			currencyRate = models.CurrencyRate{Name: curPair}
-			_ = db.Create(&currencyRate)
+			db.Create(&currencyRate)
 		} else if result.Error != nil {
 			log.Printf("getting currency from db error: %s", result.Error)
 			return
