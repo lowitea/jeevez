@@ -13,6 +13,7 @@ import (
 
 func Run(bot *tgbotapi.BotAPI, db *gorm.DB) {
 	log.Printf("Scheduler has started")
+	// TODO: Заменить на github.com/go-co-op/gocron
 	s := gocron.NewScheduler()
 	loc, _ := time.LoadLocation("Europe/Moscow")
 	s.ChangeLoc(loc)
@@ -23,7 +24,7 @@ func Run(bot *tgbotapi.BotAPI, db *gorm.DB) {
 	// таска на обновление курсов валют в базе
 	_ = s.Every(1).Day().At("1:00").Do(func() { tasks.CurrencyTask(db) })
 
-	// таска на рассылок подписок
+	// таска на рассылку подписок
 	_ = s.Every(10).Minutes().Do(func() { subscriptions.Send(bot, db) })
 
 	<-s.Start()
