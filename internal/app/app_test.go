@@ -63,7 +63,7 @@ func TestInitApp(t *testing.T) {
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Name), func(t *testing.T) {
 			testCfg.DB.Host = c.DBHost
-			_, _, _, _, err := initApp(c.InitBotFunc, c.InitCfgFunc)
+			_, err := initApp(c.InitBotFunc, c.InitCfgFunc)
 			assert.Errorf(t, err, c.ErrMsg)
 		})
 	}
@@ -71,7 +71,7 @@ func TestInitApp(t *testing.T) {
 	testCfg.DB.Host = os.Getenv("JEEVEZ_TEST_DB_HOST")
 	initCfgFunc := func() (*config.Config, error) { return &testCfg, nil }
 	initBotFunc := func(_ string) (*tgbotapi.BotAPI, error) { return &tgbotapi.BotAPI{}, nil }
-	_, _, _, _, err := initApp(initBotFunc, initCfgFunc)
+	_, err := initApp(initBotFunc, initCfgFunc)
 	assert.NoError(t, err)
 }
 
