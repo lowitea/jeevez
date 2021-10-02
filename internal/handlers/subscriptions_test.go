@@ -13,19 +13,26 @@ import (
 // TestCmdSubscriptions проверяет команду возращающую список подписок
 func TestCmdSubscriptions(t *testing.T) {
 	db := testtools.InitTestDB()
-	db.Exec("DELETE FROM chat_subscriptions")
-	db.Exec("DELETE FROM chats")
+
+	cleanDB := func() {
+		db.Delete(&models.ChatSubscription{}, "true")
+		db.Delete(&models.Chat{}, "true")
+	}
+
+	cleanDB()
+	defer cleanDB()
 
 	hTime := "11:00"
 
 	chat := models.Chat{TgID: 1}
 	db.Create(&chat)
+
 	for _, subscrData := range models.SubscrNameSubscrMap {
 		db.Create(&models.ChatSubscription{
 			ChatID:         chat.ID,
 			SubscriptionID: subscrData.ID,
 			HumanTime:      hTime,
-			// делаем инкемент времени для проверки сортировки
+			// делаем инкремент времени для проверки сортировки
 			Time: subscrData.ID + 1000,
 		})
 	}
@@ -245,8 +252,9 @@ func TestCmdUnsubscribe(t *testing.T) {
 
 	update := testtools.NewUpdate("/unsubscribe covid19-russia")
 
-	db.Create(&models.Chat{TgID: update.Message.Chat.ID})
-	chatSubscr := models.ChatSubscription{ChatID: update.Message.Chat.ID, SubscriptionID: 1}
+	chat := models.Chat{TgID: update.Message.Chat.ID}
+	db.Create(&chat)
+	chatSubscr := models.ChatSubscription{ChatID: chat.ID, SubscriptionID: 1}
 	db.Create(&chatSubscr)
 
 	expMsg := tgbotapi.NewMessage(

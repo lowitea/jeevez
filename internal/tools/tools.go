@@ -25,7 +25,7 @@ func InitSubscriptions(db *gorm.DB) {
 			db.Delete(&models.Subscription{}, subscr.ID)
 
 			// создаём новую запись
-			db.Create(&models.SubscrNameSubscrMap)
+			db.Create(&subscr)
 			continue
 		} else if result.Error != nil {
 			log.Printf("update Subscription error: %s", result.Error)
