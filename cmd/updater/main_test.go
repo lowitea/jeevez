@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/stretchr/testify/assert"
+	"github.com/urfave/cli/v2"
 	"os"
 	"testing"
 )
@@ -97,4 +98,12 @@ func TestMainFunc(t *testing.T) {
 	}
 
 	assert.Panics(t, main)
+}
+
+func TestCovid(t *testing.T) {
+	assert.NotPanics(t, func() { _ = covid(&cli.Context{}) })
+}
+
+func TestCurrency(t *testing.T) {
+	assert.NotPanics(t, func() { _ = currency(&cli.Context{}) })
 }
