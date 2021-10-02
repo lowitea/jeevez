@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/lowitea/jeevez/internal/tools/testTools"
+	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"testing"
 )
 
@@ -19,16 +19,16 @@ func TestDecorateTextHandler(t *testing.T) {
 		{"reverse русский текст", "тскет йикссур"},
 		{"invert test", "ʇsǝʇ"},
 		{"invert русский текст", "ɯɔʞǝɯ ņиʞɔɔʎd"},
-		{"zalgo test", "t̘̤̠͔̦̝͙̼̬̼̠̯̟̟̠͉̽͋́ͪ̆̍͢͡ͅę͙̗͈̣̖̻̠̯̹͕̦͉̝͖̼͇̗ͧ̽̓̆ͧ̽ͥ̋̊ͪͮ̊ͣ͛̒̀͘ş̹͖̱̹͓̮̪̗̰͓̙̊̋̄͘͞͡t̹͎̙̝͚̻͍͕͙̟̥̥̝͉͎̯͓͍ͦ̾̐͡"},
-		{"zalgo русский текст", "р͊ͧ̂ͮ҉̣̼͉̕̕у̴̷̩̭̣̱̼̦͖̖͍̽̄́ͥ͑ͧ̒͋ͤ̚͜͟с̡̬̦̣͉͓̱̣̖̹͉̺̟̥̝̘ͣ̎ͪ̄͒͊̽̒̿̌͐ͬ͒ͭ͋̈́͑ͥ̕͠͝с̶̣̘̟̆ͯ̈́̍̆̓ͬ̽̏ͦк̲̪͕̅ͨ͋̆͌̐̐̄͜и̧͙͖̖̣̾ͦ̉̃͑̌̓̇͑̃̓̿͂͑̎й̲͉̫͈͉̿ͥ͗̓͌͂ͪ̈ͪ̍́͝͝͝ ̧̛̻̘̣͎̤͍̗̬͍̹̪ͮͯ̀ͧ̀ͭ̆͆̄̃̌̀т̮̫̣̦̼̹̠͖̞͙̩͖̦̻̘͈̯͒͒̒̅̀ͤ́̀̆ͧͦ͊͂͒͗̾͐̀͟е̸͍̪̖̖̗̝͖͈̼͖̬̱͔̒͗̇̄͠ќ̡̛̪͚̟̭̠͓̦̫̼̱̦̩ͭ̔͒̽̓͒ͤͬ͐̀с̨̘̝̫̞̣̺̱̜̣̟̜͙ͣ̔ͦͧ̈̿̂ͭ͜͟т̧̛̩̩͕̮̳̪̮̣̟̱̝̞͔ͪͩ͂ͯͩ̽̽̎͘͠"},
+		{"zalgo test", "t̘̤̠͔̦̝͙̼̬̼̠̯̟̟̠͉̽͋́ͪ̆̍͢͡ͅę͙̗͈̣̖̻̠̯̹͕̦͉̝͖̼͇̗ͧ̽̓̆ͧ̽ͥ̋̊ͪͮ̊ͣ͛̒̀͘ş̹͖̱̹͓̮̪̗̰͓̙̊̋̄͘͞͡t̹͎̙̝͚̻͍͕͙̟̥̥̝͉͎̯͓͍ͦ̾̐͡"}, //nolint:lll
+		{"zalgo русский текст", "р͊ͧ̂ͮ҉̣̼͉̕̕у̴̷̩̭̣̱̼̦͖̖͍̽̄́ͥ͑ͧ̒͋ͤ̚͜͟с̡̬̦̣͉͓̱̣̖̹͉̺̟̥̝̘ͣ̎ͪ̄͒͊̽̒̿̌͐ͬ͒ͭ͋̈́͑ͥ̕͠͝с̶̣̘̟̆ͯ̈́̍̆̓ͬ̽̏ͦк̲̪͕̅ͨ͋̆͌̐̐̄͜и̧͙͖̖̣̾ͦ̉̃͑̌̓̇͑̃̓̿͂͑̎й̲͉̫͈͉̿ͥ͗̓͌͂ͪ̈ͪ̍́͝͝͝ ̧̛̻̘̣͎̤͍̗̬͍̹̪ͮͯ̀ͧ̀ͭ̆͆̄̃̌̀т̮̫̣̦̼̹̠͖̞͙̩͖̦̻̘͈̯͒͒̒̅̀ͤ́̀̆ͧͦ͊͂͒͗̾͐̀͟е̸͍̪̖̖̗̝͖͈̼͖̬̱͔̒͗̇̄͠ќ̡̛̪͚̟̭̠͓̦̫̼̱̦̩ͭ̔͒̽̓͒ͤͬ͐̀с̨̘̝̫̞̣̺̱̜̣̟̜͙ͣ̔ͦͧ̈̿̂ͭ͜͟т̧̛̩̩͕̮̳̪̮̣̟̱̝̞͔ͪͩ͂ͯͩ̽̽̎͘͠"}, //nolint:lll
 		{"no_func test", "К сожалению, такому меня не учили ):"},
 	}
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
-			update := testTools.NewUpdate("/decorate " + c.Cmd)
+			update := testtools.NewUpdate("/decorate " + c.Cmd)
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
-			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			botAPIMock := testtools.NewBotAPIMock(expMsg)
 
 			DecorateTextHandler(update, botAPIMock)
 
@@ -39,8 +39,8 @@ func TestDecorateTextHandler(t *testing.T) {
 
 // TestDecorateTextHandlerBadCmd проверяет обработку невалидной команды
 func TestDecorateTextHandlerBadCmd(t *testing.T) {
-	update := testTools.NewUpdate("невалидная команда")
-	botAPIMock := testTools.NewBotAPIMock(tgbotapi.MessageConfig{})
+	update := testtools.NewUpdate("невалидная команда")
+	botAPIMock := testtools.NewBotAPIMock(tgbotapi.MessageConfig{})
 
 	DecorateTextHandler(update, botAPIMock)
 
@@ -49,7 +49,7 @@ func TestDecorateTextHandlerBadCmd(t *testing.T) {
 
 // TestDecorateTextHandlerAllCommands проверяет вывод списка комманд
 func TestDecorateTextHandlerAllCommands(t *testing.T) {
-	update := testTools.NewUpdate("/decorate")
+	update := testtools.NewUpdate("/decorate")
 	expMsg := tgbotapi.NewMessage(
 		update.Message.Chat.ID,
 		"Чтобы попросить меня декорировать текст, отправьте команду в формате:\n"+
@@ -62,8 +62,8 @@ func TestDecorateTextHandlerAllCommands(t *testing.T) {
 			"  <b>strth</b> - Зачёркнутый текст\n"+
 			"  <b>zalgo</b> - Зальгофикация текста",
 	)
-	expMsg.ParseMode = "HTML"
-	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	expMsg.ParseMode = HTML
+	botAPIMock := testtools.NewBotAPIMock(expMsg)
 
 	DecorateTextHandler(update, botAPIMock)
 

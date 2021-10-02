@@ -1,4 +1,4 @@
-package testTools
+package testtools
 
 import (
 	"github.com/stretchr/testify/assert"

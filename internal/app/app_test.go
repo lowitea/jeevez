@@ -5,7 +5,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/config"
-	"github.com/lowitea/jeevez/internal/tools/testTools"
+	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
@@ -79,16 +79,16 @@ func TestInitApp(t *testing.T) {
 func TestReleaseNotify(t *testing.T) {
 	var adminID int64 = 666
 	expMsg := tgbotapi.NewMessage(adminID, "🤵🏻 Я обновился! :)\nМоя новая версия: 6.6.6")
-	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	botAPIMock := testtools.NewBotAPIMock(expMsg)
 	releaseNotify(botAPIMock, adminID, "6.6.6")
 	botAPIMock.AssertExpectations(t)
 }
 
 // TestProcessUpdate смоук тест общего запуска хендлеров
 func TestProcessUpdate(t *testing.T) {
-	db := testTools.InitTestDB()
-	update := testTools.NewUpdate("no_command")
-	botAPIMock := testTools.NewBotAPIMock(tgbotapi.MessageConfig{})
+	db := testtools.InitTestDB()
+	update := testtools.NewUpdate("no_command")
+	botAPIMock := testtools.NewBotAPIMock(tgbotapi.MessageConfig{})
 	assert.NotPanics(t, func() { processUpdate(update, botAPIMock, db) })
 	botAPIMock.AssertNotCalled(t, "Send")
 

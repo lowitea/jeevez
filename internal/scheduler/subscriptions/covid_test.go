@@ -3,7 +3,7 @@ package subscriptions
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
-	"github.com/lowitea/jeevez/internal/tools/testTools"
+	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -40,24 +40,24 @@ func TestGetMessage(t *testing.T) {
 
 // TestCovidTask проверяет таску отправки сообщения со статистикой ковида
 func TestCovidTask(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	db.Exec("DELETE FROM covid_stats")
 
-	var chatId int64 = 1010
+	var chatID int64 = 1010
 	subscr := models.SubscrNameSubscrMap[testCovidStat.SubscriptionName]
 
-	botAPIMock := testTools.NewBotAPIMock(tgbotapi.MessageConfig{})
-	CovidTask(botAPIMock, db, subscr, chatId)
+	botAPIMock := testtools.NewBotAPIMock(tgbotapi.MessageConfig{})
+	CovidTask(botAPIMock, db, subscr, chatID)
 	botAPIMock.AssertNotCalled(t, "Send")
 
 	// создаём объект статистики
 	db.Create(&testCovidStat)
 
-	expMsg := tgbotapi.NewMessage(chatId, testCovidMsg)
-	expMsg.ParseMode = "HTML"
+	expMsg := tgbotapi.NewMessage(chatID, testCovidMsg)
+	expMsg.ParseMode = HTML
 	expMsg.DisableNotification = true
 	expMsg.DisableWebPagePreview = true
-	botAPIMock = testTools.NewBotAPIMock(expMsg)
-	CovidTask(botAPIMock, db, subscr, chatId)
+	botAPIMock = testtools.NewBotAPIMock(expMsg)
+	CovidTask(botAPIMock, db, subscr, chatID)
 	botAPIMock.AssertExpectations(t)
 }

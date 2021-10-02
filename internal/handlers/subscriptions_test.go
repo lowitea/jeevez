@@ -4,7 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
-	"github.com/lowitea/jeevez/internal/tools/testTools"
+	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"testing"
@@ -12,7 +12,7 @@ import (
 
 // TestCmdSubscriptions проверяет команду возращающую список подписок
 func TestCmdSubscriptions(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	db.Exec("DELETE FROM chat_subscriptions")
 	db.Exec("DELETE FROM chats")
 
@@ -30,7 +30,7 @@ func TestCmdSubscriptions(t *testing.T) {
 		})
 	}
 
-	update := testTools.NewUpdate("/subscriptions")
+	update := testtools.NewUpdate("/subscriptions")
 	expMsg := tgbotapi.NewMessage(
 		update.Message.Chat.ID,
 		"Все доступные темы для подписки:\n"+
@@ -42,8 +42,8 @@ func TestCmdSubscriptions(t *testing.T) {
 			"\n- <b>covid19-russia [11:00]</b> - Дневная статистика по COViD-19 по России"+
 			"\n- <b>covid19-moscow [11:00]</b> - Дневная статистика по COViD-19 по Москве",
 	)
-	expMsg.ParseMode = "HTML"
-	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	expMsg.ParseMode = HTML
+	botAPIMock := testtools.NewBotAPIMock(expMsg)
 
 	cmdSubscriptions(update, botAPIMock, db)
 
@@ -106,7 +106,7 @@ func TestParseTimeInvalid(t *testing.T) {
 
 // TestCndSubscribeInvalid проверяем невалидные кейсы для команды подписки
 func TestCndSubscribeInvalid(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	cases := [...]struct {
 		Cmd       string
 		MsgText   string
@@ -134,17 +134,17 @@ func TestCndSubscribeInvalid(t *testing.T) {
 		{
 			"/subscribe covid19-russia 11:00",
 			"К сожалению, не получилось Вас подписать на тему, попробуйте пожалуйста позже ):",
-			"HTML",
+			HTML,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
-			update := testTools.NewUpdate(c.Cmd)
+			update := testtools.NewUpdate(c.Cmd)
 			update.Message.Chat.ID = 666
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
 			expMsg.ParseMode = c.ParseMode
-			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			botAPIMock := testtools.NewBotAPIMock(expMsg)
 			cmdSubscribe(update, botAPIMock, db)
 			botAPIMock.AssertExpectations(t)
 		})
@@ -153,9 +153,9 @@ func TestCndSubscribeInvalid(t *testing.T) {
 
 // TestCmdSubscribe проверяем подписку
 func TestCmdSubscribe(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 
-	update := testTools.NewUpdate("/subscribe covid19-russia 11:00")
+	update := testtools.NewUpdate("/subscribe covid19-russia 11:00")
 	update.Message.Chat.ID = 777
 
 	chat := models.Chat{TgID: update.Message.Chat.ID}
@@ -168,9 +168,9 @@ func TestCmdSubscribe(t *testing.T) {
 			"Теперь я буду приходить и рассказывать вам новости по теме "+
 			"<b>covid19-russia</b> каждый день в <b>11:00</b>.",
 	)
-	expMsg.ParseMode = "HTML"
+	expMsg.ParseMode = HTML
 
-	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	botAPIMock := testtools.NewBotAPIMock(expMsg)
 	cmdSubscribe(update, botAPIMock, db)
 	botAPIMock.AssertExpectations(t)
 
@@ -187,7 +187,7 @@ func TestCmdSubscribe(t *testing.T) {
 	expMsg.Text = "Я понял Вас :)\nБудет сделано.\n" +
 		"Теперь я буду приходить и рассказывать вам новости по теме " +
 		"<b>covid19-russia</b> каждый день в <b>23:42</b>."
-	botAPIMock = testTools.NewBotAPIMock(expMsg)
+	botAPIMock = testtools.NewBotAPIMock(expMsg)
 	cmdSubscribe(update, botAPIMock, db)
 
 	botAPIMock.AssertExpectations(t)
@@ -200,7 +200,7 @@ func TestCmdSubscribe(t *testing.T) {
 
 // TestCmdUnsubscribeInvalid проверяет невалидные кейсы для команды отписки
 func TestCmdUnsubscribeInvalid(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	cases := [...]struct {
 		Cmd       string
 		MsgText   string
@@ -217,22 +217,22 @@ func TestCmdUnsubscribeInvalid(t *testing.T) {
 		{
 			"/unsubscribe no_exist_theme",
 			"Не нашёл в своих записях информации, что Вы подписаны по тему <b>no_exist_theme</b> :(",
-			"HTML",
+			HTML,
 		},
 		{
 			"/unsubscribe covid19-russia",
 			"Не нашёл в своих записях информации, что Вы подписаны по тему <b>covid19-russia</b> :(",
-			"HTML",
+			HTML,
 		},
 	}
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
-			update := testTools.NewUpdate(c.Cmd)
+			update := testtools.NewUpdate(c.Cmd)
 			update.Message.Chat.ID = 666
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
 			expMsg.ParseMode = c.ParseMode
-			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			botAPIMock := testtools.NewBotAPIMock(expMsg)
 			cmdUnsubscribe(update, botAPIMock, db)
 			botAPIMock.AssertExpectations(t)
 		})
@@ -241,9 +241,9 @@ func TestCmdUnsubscribeInvalid(t *testing.T) {
 
 // TestCmdUnsubscribe проверяет отписку от темы
 func TestCmdUnsubscribe(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 
-	update := testTools.NewUpdate("/unsubscribe covid19-russia")
+	update := testtools.NewUpdate("/unsubscribe covid19-russia")
 
 	db.Create(&models.Chat{TgID: update.Message.Chat.ID})
 	chatSubscr := models.ChatSubscription{ChatID: update.Message.Chat.ID, SubscriptionID: 1}
@@ -253,8 +253,8 @@ func TestCmdUnsubscribe(t *testing.T) {
 		update.Message.Chat.ID,
 		"Успешно отписал Вас от темы с именем <b>covid19-russia</b>\nНа здоровье)",
 	)
-	expMsg.ParseMode = "HTML"
-	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	expMsg.ParseMode = HTML
+	botAPIMock := testtools.NewBotAPIMock(expMsg)
 	cmdUnsubscribe(update, botAPIMock, db)
 	botAPIMock.AssertExpectations(t)
 
@@ -271,7 +271,7 @@ func TestCmdUnsubscribe(t *testing.T) {
 
 // TestCmdSubscriptionInvalid проверяет невалидные кейсы для получения данных темы без подписки
 func TestCmdSubscriptionInvalid(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	cases := [...]struct {
 		Cmd     string
 		MsgText string
@@ -291,9 +291,9 @@ func TestCmdSubscriptionInvalid(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
-			update := testTools.NewUpdate(c.Cmd)
+			update := testtools.NewUpdate(c.Cmd)
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
-			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			botAPIMock := testtools.NewBotAPIMock(expMsg)
 			cmdSubscription(update, botAPIMock, db)
 			botAPIMock.AssertExpectations(t)
 		})
@@ -302,7 +302,7 @@ func TestCmdSubscriptionInvalid(t *testing.T) {
 
 // TestCmdSubscription проверяет команду получения данных темы без подписки
 func TestCmdSubscription(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	covidStat := models.CovidStat{
 		SubscriptionName: "covid19-moscow",
 		Confirmed:        10,
@@ -318,7 +318,7 @@ func TestCmdSubscription(t *testing.T) {
 	}
 	db.Create(&covidStat)
 
-	update := testTools.NewUpdate("/subscription covid19-moscow")
+	update := testtools.NewUpdate("/subscription covid19-moscow")
 	expMsg := tgbotapi.NewMessage(
 		update.Message.Chat.ID,
 		"🦠 <b>COVID-19 Статистика []</b>\n"+
@@ -330,17 +330,17 @@ func TestCmdSubscription(t *testing.T) {
 			"Летальность: 99.900000\n\n"+
 			"https://yandex.ru/covid19/stat",
 	)
-	expMsg.ParseMode = "HTML"
+	expMsg.ParseMode = HTML
 	expMsg.DisableWebPagePreview = true
 	expMsg.DisableNotification = true
-	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	botAPIMock := testtools.NewBotAPIMock(expMsg)
 	cmdSubscription(update, botAPIMock, db)
 	botAPIMock.AssertExpectations(t)
 }
 
 // TestSubscriptionsHandler тестирует общий обработчик для команд управления подписками
 func TestSubscriptionsHandler(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	cases := [...]struct {
 		Cmd       string
 		MsgText   string
@@ -353,7 +353,7 @@ func TestSubscriptionsHandler(t *testing.T) {
 				"<b>covid19-russia</b> - Дневная статистика по COViD-19 по России\n\n" +
 				"Пример команды для подписки:\n" +
 				"/subscribe covid19-russia 11:00\n\n",
-			"HTML",
+			HTML,
 		},
 		{
 			"/subscribe",
@@ -383,11 +383,11 @@ func TestSubscriptionsHandler(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
-			update := testTools.NewUpdate(c.Cmd)
+			update := testtools.NewUpdate(c.Cmd)
 			update.Message.Chat.ID = 666
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
 			expMsg.ParseMode = c.ParseMode
-			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			botAPIMock := testtools.NewBotAPIMock(expMsg)
 			SubscriptionsHandler(update, botAPIMock, db)
 			botAPIMock.AssertExpectations(t)
 		})

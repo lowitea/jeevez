@@ -1,7 +1,7 @@
 package config
 
 const (
-	CurrencyApiScheme = "https"
-	CurrencyApiHost   = "free.currconv.com"
-	CurrencyApiPath   = "api/v7/convert"
+	CurrencyAPIScheme = "https"
+	CurrencyAPIHost   = "free.currconv.com"
+	CurrencyAPIPath   = "api/v7/convert"
 )

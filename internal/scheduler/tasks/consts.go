@@ -4,17 +4,17 @@ import "net/http"
 
 type subscrConf struct {
 	HumanName string
-	UrlTpl    string
+	URLTpl    string
 }
 
-var subscrUrlMap = map[string]subscrConf{
+var subscrURLMap = map[string]subscrConf{
 	"covid19-moscow": {
 		HumanName: "Москва",
-		UrlTpl:    "https://covid-api.com/api/reports?date=%s&iso=rus&region_province=Moscow",
+		URLTpl:    "https://covid-api.com/api/reports?date=%s&iso=rus&region_province=Moscow",
 	},
 	"covid19-russia": {
 		HumanName: "Россия",
-		UrlTpl:    "https://covid-api.com/api/reports?date=%s&iso=rus",
+		URLTpl:    "https://covid-api.com/api/reports?date=%s&iso=rus",
 	},
 }
 

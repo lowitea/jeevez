@@ -3,7 +3,7 @@ package tasks
 import (
 	"errors"
 	"github.com/lowitea/jeevez/internal/models"
-	"github.com/lowitea/jeevez/internal/tools/testTools"
+	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
@@ -40,7 +40,7 @@ func TestGetCurrencyRate(t *testing.T) {
 
 // TestCurrencyTask тестирование таски на получение данных по валютам
 func TestCurrencyTask(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	db.Delete(&models.CurrencyRate{}, "true")
 	defer func(f func(url string) (resp *http.Response, err error)) {
 		httpGet = f

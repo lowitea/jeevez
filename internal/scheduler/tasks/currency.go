@@ -66,19 +66,18 @@ func CurrencyTask(db *gorm.DB) {
 		log.Printf("db is nil")
 		return
 	}
-	baseUrl := url.URL{
-		Scheme: config.CurrencyApiScheme,
-		Host:   config.CurrencyApiHost,
-		Path:   config.CurrencyApiPath,
+	baseURL := url.URL{
+		Scheme: config.CurrencyAPIScheme,
+		Host:   config.CurrencyAPIHost,
+		Path:   config.CurrencyAPIPath,
 	}
 
 	for _, curPair := range CurrencyPairs {
-
-		curUrl := baseUrl
+		curURL := baseURL
 		token := config.Cfg.CurrencyAPI.Token
-		curUrl.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, token)
+		curURL.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, token)
 
-		curRate, err := getCurrencyRate(curUrl.String())
+		curRate, err := getCurrencyRate(curURL.String())
 		if err != nil {
 			log.Printf("getting currency rate error: %s", err)
 			return

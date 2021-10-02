@@ -5,7 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/structs"
-	"github.com/lowitea/jeevez/internal/tools/testTools"
+	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 	"testing"
@@ -38,7 +38,7 @@ func TestGetNowTimeInterval(t *testing.T) {
 
 // TestSend проверяет функцию отправки сообщений в соответствии с подписками
 func TestSend(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 
 	defer func(m map[models.Subscription]func(
 		bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgId int64,
@@ -66,15 +66,15 @@ func TestSend(t *testing.T) {
 			"Смерти: 10001 (+1101)\nВыздоровевшие: 11 (+10101)\nБолеющие: 1 (+101)\n"+
 			"Летальность: 111.000000\n\nhttps://yandex.ru/covid19/stat",
 	)
-	expMsg.ParseMode = "HTML"
+	expMsg.ParseMode = HTML
 	expMsg.DisableWebPagePreview = true
 	expMsg.DisableNotification = true
-	botAPIMock := testTools.NewBotAPIMock(expMsg)
+	botAPIMock := testtools.NewBotAPIMock(expMsg)
 
 	// проверяет корректную отправку сообщения
 	assert.NotPanics(t, func() { Send(botAPIMock, db) })
 
 	// проверяем ошибку ненайденной функции в карте
-	SubscriptionFuncMap = map[models.Subscription]func(bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgId int64){}
+	SubscriptionFuncMap = map[models.Subscription]TaskFunc{}
 	assert.NotPanics(t, func() { Send(botAPIMock, db) })
 }

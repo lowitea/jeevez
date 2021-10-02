@@ -29,26 +29,29 @@ func getCurrencyRate(db *gorm.DB, curPair string) (float64, error) {
 
 // getCurPair функция принимающая введённые пользователем названия валют и возвращающая имя пары
 func getCurPair(firstCur string, secCur string) string {
-	var firstElem string
-	var secElem string
-	if firstCur == "доллар" || firstCur == "долларов" || firstCur == "доллара" {
-		firstElem = "USD"
+	USD := "USD"
+	RUB := "RUB"
+	EUR := "EUR"
+
+	firstCurPatterns := map[string]string{
+		"доллар":   USD,
+		"долларов": USD,
+		"доллара":  USD,
+		"рубль":    RUB,
+		"рублей":   RUB,
+		"рубля":    RUB,
+		"евро":     EUR,
 	}
-	if firstCur == "рубль" || firstCur == "рублей" || firstCur == "рубля" {
-		firstElem = "RUB"
+
+	secCurPatterns := map[string]string{
+		"доллары": USD,
+		"рубли":   RUB,
+		"евро":    EUR,
 	}
-	if firstCur == "евро" {
-		firstElem = "EUR"
-	}
-	if secCur == "рубли" {
-		secElem = "RUB"
-	}
-	if secCur == "доллары" {
-		secElem = "USD"
-	}
-	if secCur == "евро" {
-		secElem = "EUR"
-	}
+
+	firstElem := firstCurPatterns[firstCur]
+	secElem := secCurPatterns[secCur]
+
 	if firstElem == secElem {
 		return ""
 	}
@@ -58,8 +61,7 @@ func getCurPair(firstCur string, secCur string) string {
 // getMsgAllCurrencies формирует сообщение со списком всех валют
 func getMsgAllCurrencies(db *gorm.DB) (msgText string, err error) {
 	var curRates []models.CurrencyRate
-	result := db.Find(&curRates)
-	if result.Error != nil {
+	if result := db.Find(&curRates); result.Error != nil {
 		log.Printf("getting currencies from db error: %s", result.Error)
 		return "", result.Error
 	}

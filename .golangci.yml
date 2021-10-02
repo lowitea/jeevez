@@ -22,7 +22,6 @@ linters:
     - gocyclo
     - godox
     - goheader
-    - gomnd
     - gomoddirectives
     - gomodguard
     - goprintffuncname
@@ -43,9 +42,13 @@ linters:
     - rowserrcheck
     - sqlclosecheck
     - stylecheck
-    - tagliatelle
     - unconvert
     - unparam
     - wastedassign
     - whitespace
-    - wrapcheck
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - funlen

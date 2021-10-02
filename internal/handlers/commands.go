@@ -22,7 +22,7 @@ func cmdHelp(update tgbotapi.Update, bot structs.Bot) {
 
 // cmdRoll выкидывает случайное число от 0 до 100
 func cmdRoll(update tgbotapi.Update, bot structs.Bot) {
-	num := rand.Intn(101)
+	num := rand.Intn(101) //nolint:gosec
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, strconv.Itoa(num))
 	msg.ReplyToMessageID = update.Message.MessageID
 	_, _ = bot.Send(msg)
