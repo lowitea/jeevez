@@ -50,7 +50,7 @@ func initApp(
 	}
 
 	// запуск фоновых задач
-	go scheduler.Run(bot, db)
+	scheduler.Run(bot, db)
 
 	updateCfg := tgbotapi.NewUpdate(0)
 	updateCfg.Timeout = 1
