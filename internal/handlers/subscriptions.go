@@ -22,7 +22,7 @@ func cmdSubscriptions(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	msgTextB.WriteString("Все доступные темы для подписки:\n\n")
 
 	// сортируем словарь подписок
-	var subscrsMapKeys []string
+	subscrsMapKeys := make([]string, 0, len(models.SubscrNameSubscrMap))
 	for k := range models.SubscrNameSubscrMap {
 		subscrsMapKeys = append(subscrsMapKeys, k)
 	}
@@ -62,7 +62,7 @@ func cmdSubscriptions(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgTextB.String())
 	msg.ReplyToMessageID = update.Message.MessageID
-	msg.ParseMode = "HTML"
+	msg.ParseMode = HTML
 	_, _ = bot.Send(msg)
 }
 
@@ -92,6 +92,33 @@ func parseTime(timeStr string) (int64, error) {
 	}
 
 	return secs, nil
+}
+
+// createChatSubscr создаёт связь чата и подписки
+func createChatSubscr(db *gorm.DB, chatID, subscrID, time int64, subscrName, humanTime string) (msgText string) {
+	chatSubscr := models.ChatSubscription{
+		ChatID:         chatID,
+		SubscriptionID: subscrID,
+		Time:           time,
+		HumanTime:      humanTime,
+	}
+
+	clauses := db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "chat_id"}, {Name: "subscription_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"time", "created_at", "human_time"}),
+	})
+	if result := clauses.Create(&chatSubscr); result.Error != nil {
+		log.Printf("create ChatSubscription error: %s", result.Error)
+		msgText = "К сожалению, не получилось Вас подписать на тему, " +
+			"попробуйте пожалуйста позже ):"
+	} else {
+		msgText = fmt.Sprintf(
+			"Я понял Вас :)\nБудет сделано.\n"+
+				"Теперь я буду приходить и рассказывать вам новости по теме "+
+				"<b>%s</b> каждый день в <b>%s</b>.", subscrName, humanTime,
+		)
+	}
+	return
 }
 
 // cmdSubscribe подписывает чат на заданную рассылку
@@ -144,34 +171,10 @@ func cmdSubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	var chat models.Chat
 	db.First(&chat, "tg_id = ?", update.Message.Chat.ID)
 
-	chatSubscr := models.ChatSubscription{
-		ChatID:         chat.ID,
-		SubscriptionID: subscr.ID,
-		Time:           subscrSeconds,
-		HumanTime:      subscrTime,
-	}
-
-	// Создаём объект связи чата с подпиской
-	var msgText string
-	clauses := db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "chat_id"}, {Name: "subscription_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"time", "created_at", "human_time"}),
-	})
-	if result := clauses.Create(&chatSubscr); result.Error != nil {
-		log.Printf("create ChatSubscription error: %s", result.Error)
-		msgText = msgText +
-			"К сожалению, не получилось Вас подписать на тему, " +
-			"попробуйте пожалуйста позже ):"
-	} else {
-		msgText = msgText + fmt.Sprintf(
-			"Я понял Вас :)\nБудет сделано.\n"+
-				"Теперь я буду приходить и рассказывать вам новости по теме "+
-				"<b>%s</b> каждый день в <b>%s</b>.", subscrName, subscrTime,
-		)
-	}
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+	createMsg := createChatSubscr(db, chat.ID, subscr.ID, subscrSeconds, subscrName, subscrTime)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, createMsg)
 	msg.ReplyToMessageID = update.Message.MessageID
-	msg.ParseMode = "HTML"
+	msg.ParseMode = HTML
 	_, _ = bot.Send(msg)
 }
 
@@ -208,7 +211,7 @@ func cmdUnsubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 			fmt.Sprintf("Не нашёл в своих записях информации, что Вы подписаны по тему <b>%s</b> :(", subscrName),
 		)
 		msg.ReplyToMessageID = update.Message.MessageID
-		msg.ParseMode = "HTML"
+		msg.ParseMode = HTML
 		_, _ = bot.Send(msg)
 		return
 	}
@@ -220,7 +223,7 @@ func cmdUnsubscribe(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 		fmt.Sprintf("Успешно отписал Вас от темы с именем <b>%s</b>\nНа здоровье)", subscrName),
 	)
 	msg.ReplyToMessageID = update.Message.MessageID
-	msg.ParseMode = "HTML"
+	msg.ParseMode = HTML
 	_, _ = bot.Send(msg)
 }
 
@@ -259,13 +262,14 @@ func cmdSubscription(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 
 // SubscriptionsHandler обработчик для команд подписок
 func SubscriptionsHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
-	if update.Message.Text == "/subscriptions" {
+	switch {
+	case update.Message.Text == "/subscriptions":
 		cmdSubscriptions(update, bot, db)
-	} else if strings.HasPrefix(update.Message.Text, "/subscribe") {
+	case strings.HasPrefix(update.Message.Text, "/subscribe"):
 		cmdSubscribe(update, bot, db)
-	} else if strings.HasPrefix(update.Message.Text, "/unsubscribe") {
+	case strings.HasPrefix(update.Message.Text, "/unsubscribe"):
 		cmdUnsubscribe(update, bot, db)
-	} else if strings.HasPrefix(update.Message.Text, "/subscription") {
+	case strings.HasPrefix(update.Message.Text, "/subscription"):
 		cmdSubscription(update, bot, db)
 	}
 }

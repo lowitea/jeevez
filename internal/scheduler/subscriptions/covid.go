@@ -41,7 +41,7 @@ func GetMessage(stat models.CovidStat) string {
 }
 
 // CovidTask таска рассылающая статистику по ковиду
-func CovidTask(bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgId int64) {
+func CovidTask(bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgID int64) {
 	var stat models.CovidStat
 
 	if result := db.First(&stat, "subscription_name = ?", subscr.Name); result.Error != nil {
@@ -49,8 +49,8 @@ func CovidTask(bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgI
 		return
 	}
 
-	msg := tgbotapi.NewMessage(chatTgId, GetMessage(stat))
-	msg.ParseMode = "HTML"
+	msg := tgbotapi.NewMessage(chatTgID, GetMessage(stat))
+	msg.ParseMode = HTML
 	msg.DisableNotification = true
 	msg.DisableWebPagePreview = true
 

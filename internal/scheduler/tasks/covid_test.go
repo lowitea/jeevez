@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/lowitea/jeevez/internal/models"
-	"github.com/lowitea/jeevez/internal/tools/testTools"
+	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -125,7 +125,7 @@ func TestGetStat(t *testing.T) {
 
 // TestCovidTask тестирование таски на получение данных по ковиду
 func TestCovidTask(t *testing.T) {
-	db := testTools.InitTestDB()
+	db := testtools.InitTestDB()
 	db.Delete(&models.CovidStat{}, "true")
 	defer func(f func(url string) (resp *http.Response, err error)) {
 		httpGet = f

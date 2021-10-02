@@ -6,7 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
-var SubscriptionFuncMap = map[models.Subscription]func(bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgId int64){
+const HTML = "HTML"
+
+type TaskFunc = func(bot structs.Bot, db *gorm.DB, subscr models.Subscription, chatTgId int64)
+
+var SubscriptionFuncMap = map[models.Subscription]TaskFunc{
 	{
 		ID:          1,
 		Name:        "covid19-russia",

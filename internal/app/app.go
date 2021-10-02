@@ -12,6 +12,13 @@ import (
 	"log"
 )
 
+type appDepContainer struct {
+	updateConfig *tgbotapi.UpdateConfig
+	bot          structs.Bot
+	db           *gorm.DB
+	cfg          *config.Config
+}
+
 // processUpdate обрабатывает полученный апдейт
 func processUpdate(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	// пропускаем, если сообщения нет
@@ -29,16 +36,16 @@ func processUpdate(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 func initApp(
 	initBotFunc func(token string) (*tgbotapi.BotAPI, error),
 	initCfgFunc func() (*config.Config, error),
-) (*tgbotapi.UpdateConfig, structs.Bot, *gorm.DB, *config.Config, error) {
+) (*appDepContainer, error) {
 	// инициализируем конфиг
 	cfg, err := initCfgFunc()
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("env parse error: %s", err)
+		return nil, fmt.Errorf("env parse error: %w", err)
 	}
 
 	bot, err := initBotFunc(cfg.Telegram.Token)
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("error connect to telegram: %s", err)
+		return nil, fmt.Errorf("error connect to telegram: %w", err)
 	}
 	log.Printf("Bot version: %s", cfg.App.Version)
 	log.Printf("Authorized on account %s", bot.Self.UserName)
@@ -46,7 +53,7 @@ func initApp(
 	// инициализация базы
 	db, err := tools.InitDB(cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name)
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("error init database: %s", err)
+		return nil, fmt.Errorf("error init database: %w", err)
 	}
 
 	// запуск фоновых задач
@@ -55,7 +62,7 @@ func initApp(
 	updateCfg := tgbotapi.NewUpdate(0)
 	updateCfg.Timeout = 1
 
-	return &updateCfg, bot, db, cfg, nil
+	return &appDepContainer{updateConfig: &updateCfg, bot: bot, db: db, cfg: cfg}, nil
 }
 
 // releaseNotify отправляет сообщение админу о деплое
@@ -69,16 +76,16 @@ func releaseNotify(bot structs.Bot, adminID int64, version string) {
 
 // Run функция запускающая бот
 func Run() {
-	updateCfg, bot, db, cfg, err := initApp(tgbotapi.NewBotAPI, config.InitConfig)
+	depContainer, err := initApp(tgbotapi.NewBotAPI, config.InitConfig)
 	if err != nil {
 		log.Panicf("error init app %s\n", err)
 	}
 
-	updates, _ := bot.GetUpdatesChan(*updateCfg)
-	releaseNotify(bot, cfg.Telegram.Admin, cfg.App.Version)
+	updates, _ := depContainer.bot.GetUpdatesChan(*depContainer.updateConfig)
+	releaseNotify(depContainer.bot, depContainer.cfg.Telegram.Admin, depContainer.cfg.App.Version)
 
 	// запуск обработки сообщений
 	for update := range updates {
-		processUpdate(update, bot, db)
+		processUpdate(update, depContainer.bot, depContainer.db)
 	}
 }

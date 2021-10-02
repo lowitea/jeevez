@@ -3,7 +3,7 @@ package handlers
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/lowitea/jeevez/internal/tools/testTools"
+	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"testing"
 )
 
@@ -34,9 +34,9 @@ func TestSwitchHandler(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(fmt.Sprintf("cmd=%s", c.Cmd), func(t *testing.T) {
-			update := testTools.NewUpdate(c.Cmd)
+			update := testtools.NewUpdate(c.Cmd)
 			expMsg := tgbotapi.NewMessage(update.Message.Chat.ID, c.MsgText)
-			botAPIMock := testTools.NewBotAPIMock(expMsg)
+			botAPIMock := testtools.NewBotAPIMock(expMsg)
 
 			SwitchHandler(update, botAPIMock)
 
@@ -47,22 +47,22 @@ func TestSwitchHandler(t *testing.T) {
 
 // TestSwitchHandlerInvalidCmd проверяет обработчик при невалидных командах
 func TestSwitchHandlerInvalidCmd(t *testing.T) {
-	update := testTools.NewUpdate("/no_switch")
-	botAPIMock := testTools.NewBotAPIMock(tgbotapi.MessageConfig{})
+	update := testtools.NewUpdate("/no_switch")
+	botAPIMock := testtools.NewBotAPIMock(tgbotapi.MessageConfig{})
 
 	SwitchHandler(update, botAPIMock)
 
 	botAPIMock.AssertNotCalled(t, "Send")
 
 	// проверяем команду без параметров
-	update = testTools.NewUpdate("/switch")
+	update = testtools.NewUpdate("/switch")
 	expMsg := tgbotapi.NewMessage(
 		update.Message.Chat.ID,
 		"Пришлите текст для изменения его раскладки.\n"+
 			"Пример команды:\n"+
 			"/switch L;bdbc - cfvsq kexibq ,jn!)",
 	)
-	botAPIMock = testTools.NewBotAPIMock(expMsg)
+	botAPIMock = testtools.NewBotAPIMock(expMsg)
 
 	SwitchHandler(update, botAPIMock)
 

@@ -48,7 +48,6 @@ func decorInvert(text string) string {
 	}
 
 	for _, letter := range letters {
-
 		if decoratedLetter, ok := LettersInvertedMap[letter]; ok {
 			decoratedTextB.WriteString(decoratedLetter)
 		} else {
@@ -127,7 +126,7 @@ func DecorateTextHandler(update tgbotapi.Update, bot structs.Bot) {
 				"Все варианты декорирования:\n%s", listCommandsB.String()),
 		)
 		msg.ReplyToMessageID = update.Message.MessageID
-		msg.ParseMode = "HTML"
+		msg.ParseMode = HTML
 		_, _ = bot.Send(msg)
 		return
 	}

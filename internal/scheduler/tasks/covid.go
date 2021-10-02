@@ -85,7 +85,7 @@ func getStat(url string) (*covidStat, error) {
 		var err error
 		stats, err = getData(fmt.Sprintf(url, dt))
 		if err != nil {
-			return nil, fmt.Errorf("getting covid stats error: %s", err)
+			return nil, fmt.Errorf("getting covid stats error: %w", err)
 		}
 		if len(stats) != 0 {
 			break
@@ -112,8 +112,8 @@ func CovidTask(db *gorm.DB) {
 		return
 	}
 
-	for statName, statConf := range subscrUrlMap {
-		respStat, err := getStat(statConf.UrlTpl)
+	for statName, statConf := range subscrURLMap {
+		respStat, err := getStat(statConf.URLTpl)
 		if err != nil {
 			log.Printf("Error get data: %s", err)
 			continue
@@ -137,12 +137,13 @@ func CovidTask(db *gorm.DB) {
 		// создаём или обновляем статистику по ковиду
 		var statDB models.CovidStat
 		result := db.First(&statDB, "subscription_name = ?", statName)
-		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		switch {
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
 			db.Create(&stat)
-		} else if result.Error != nil {
+		case result.Error != nil:
 			log.Printf("getting CovidStat from db error: %s", result.Error)
 			return
-		} else {
+		default:
 			stat.ID = statDB.ID
 			db.Save(&stat)
 		}

@@ -1,4 +1,4 @@
-package testTools
+package testtools
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -12,7 +12,7 @@ type BotAPIMock struct {
 }
 
 // Send замоканный метод отправки сообщений в апи
-func (s *BotAPIMock) Send(c tgbotapi.Chattable) (tgbotapi.Message, error) { //nolint:govet
+func (s *BotAPIMock) Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
 	args := s.Called(c)
 	return args.Get(0).(tgbotapi.Message), args.Error(1)
 }

@@ -13,6 +13,7 @@ import (
 func InitSubscriptions(db *gorm.DB) {
 	log.Print("InitSubscriptions has started")
 	for _, subscr := range models.SubscrNameSubscrMap {
+		subscr := subscr
 		// пытаемся получить подписку из базы по id и name
 		subscrDB := models.Subscription{}
 		result := db.First(&subscrDB, "id = ? AND name = ?", subscr.ID, subscr.Name)
