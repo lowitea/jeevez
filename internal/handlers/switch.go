@@ -87,7 +87,7 @@ func getSwitchFunc(text string) func(letter string) string {
 	return switchLetterFunc
 }
 
-// cmdSwitch меняет раскладку текста
+// SwitchHandler меняет раскладку текста
 func SwitchHandler(update tgbotapi.Update, bot structs.Bot) {
 	isSwitchCommand := strings.HasPrefix(
 		update.Message.Text, "/switch") || strings.HasPrefix(update.Message.Text, ".ыцшеср")

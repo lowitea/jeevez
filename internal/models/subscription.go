@@ -38,4 +38,9 @@ var SubscrNameSubscrMap = map[string]Subscription{
 		Name:        "covid19-moscow",
 		Description: "Дневная статистика по COViD-19 по Москве",
 	},
+	"yoga-test": {
+		ID:          3,
+		Name:        "yoga-test",
+		Description: "Ежедневный тест с позами йоги",
+	},
 }
