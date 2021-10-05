@@ -24,7 +24,7 @@ func YogaCallbackHandler(update tgbotapi.Update, bot structs.Bot) {
 		validAnswer := strings.SplitN(update.CallbackQuery.Data, " ", 3)
 		msg = tgbotapi.NewMessage(
 			update.CallbackQuery.Message.Chat.ID,
-			fmt.Sprintf("Эх, ошибка 🤷\nПравильный ответ: %s 🧘", validAnswer[2]),
+			fmt.Sprintf("Эх, ошибка 🤷\nПравильный ответ:\n%s 🧘", validAnswer[2]),
 		)
 	}
 	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
