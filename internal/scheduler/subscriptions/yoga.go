@@ -1,6 +1,7 @@
 package subscriptions
 
 import (
+	"embed"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/lowitea/jeevez/internal/models"
@@ -21,6 +22,9 @@ var yogaPoses = map[string]string{
 	"Випарита Карани":          "6.jpg",
 	"Пашчимоттанасана":         "7.jpg",
 }
+
+//go:embed static/yoga
+var yogaImages embed.FS
 
 var allPoses = make([]string, 0, len(yogaPoses))
 
@@ -53,9 +57,10 @@ func YogaTestTask(bot structs.Bot, _ *gorm.DB, _ models.Subscription, chatTgID i
 
 	rand.Shuffle(len(variants), func(i, j int) { variants[i], variants[j] = variants[j], variants[i] })
 
-	imgPath := path.Join("internal", "static", "yoga", yogaPoses[validPose])
+	imgPath := path.Join("static", "yoga", yogaPoses[validPose])
+	img, _ := yogaImages.ReadFile(imgPath)
 
-	msg := tgbotapi.NewPhotoUpload(chatTgID, imgPath)
+	msg := tgbotapi.NewPhotoUpload(chatTgID, tgbotapi.FileBytes{Name: yogaPoses[validPose], Bytes: img})
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(variants...)
 	_, _ = bot.Send(msg)
 }
