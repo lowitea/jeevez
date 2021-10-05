@@ -360,7 +360,8 @@ func TestSubscriptionsHandler(t *testing.T) {
 			"/subscriptions",
 			"Все доступные темы для подписки:\n\n" +
 				"<b>covid19-moscow</b> - Дневная статистика по COViD-19 по Москве\n" +
-				"<b>covid19-russia</b> - Дневная статистика по COViD-19 по России\n\n" +
+				"<b>covid19-russia</b> - Дневная статистика по COViD-19 по России\n" +
+				"<b>yoga-test</b> - Ежедневный тест с позами йоги\n\n" +
 				"Пример команды для подписки:\n" +
 				"/subscribe covid19-russia 11:00\n\n",
 			HTML,
