@@ -16,15 +16,17 @@ func YogaCallbackHandler(update tgbotapi.Update, bot structs.Bot) {
 
 	_, _ = bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
 
+	nextMsg := "\n\nДля продолжения нажми: /yoga"
+
 	var msg tgbotapi.MessageConfig
 	switch {
 	case update.CallbackQuery.Data == "/yoga valid":
-		msg = tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Ура ответ, верный! 🎉 🎉 🎉")
+		msg = tgbotapi.NewMessage(update.CallbackQuery.Message.Chat.ID, "Ура ответ, верный! 🎉 🎉 🎉"+nextMsg)
 	case strings.HasPrefix(update.CallbackQuery.Data, "/yoga invalid"):
 		validAnswer := strings.SplitN(update.CallbackQuery.Data, " ", 3)
 		msg = tgbotapi.NewMessage(
 			update.CallbackQuery.Message.Chat.ID,
-			fmt.Sprintf("Эх, ошибка 🤷\nПравильный ответ:\n%s 🧘", validAnswer[2]),
+			fmt.Sprintf("Эх, ошибка 🤷\nПравильный ответ:\n%s 🧘%s", validAnswer[2], nextMsg),
 		)
 	}
 	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
