@@ -22,15 +22,17 @@ type appDepContainer struct {
 // processUpdate обрабатывает полученный апдейт
 func processUpdate(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	// пропускаем, если сообщения нет
-	if update.Message == nil {
-		return
+	if update.Message != nil {
+		go handlers.StartHandler(update, bot, db)
+		go handlers.BaseCommandHandler(update, bot)
+		go handlers.CurrencyConverterHandler(update, bot, db)
+		go handlers.SwitchHandler(update, bot)
+		go handlers.SubscriptionsHandler(update, bot, db)
+		go handlers.DecorateTextHandler(update, bot)
+		go handlers.YogaHandler(update, bot)
+	} else if update.CallbackQuery != nil {
+		go handlers.YogaCallbackHandler(update, bot)
 	}
-	go handlers.StartHandler(update, bot, db)
-	go handlers.BaseCommandHandler(update, bot)
-	go handlers.CurrencyConverterHandler(update, bot, db)
-	go handlers.SwitchHandler(update, bot)
-	go handlers.SubscriptionsHandler(update, bot, db)
-	go handlers.DecorateTextHandler(update, bot)
 }
 
 func initApp(
