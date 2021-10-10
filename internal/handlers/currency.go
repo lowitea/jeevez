@@ -25,20 +25,28 @@ var firstCurPatterns = map[string]string{
 	"доллар":   USD,
 	"долларов": USD,
 	"доллара":  USD,
+	"$":        USD,
 	"рубль":    RUB,
 	"рублей":   RUB,
 	"рубля":    RUB,
+	"₽":        RUB,
 	"евро":     EUR,
+	"€":        EUR,
 	"фунт":     GBP,
 	"фунтов":   GBP,
 	"фунта":    GBP,
+	"£":        GBP,
 }
 
 var secCurPatterns = map[string]string{
 	"доллары": USD,
+	"$":       USD,
 	"рубли":   RUB,
+	"₽":       RUB,
 	"евро":    EUR,
+	"€":       EUR,
 	"фунты":   GBP,
+	"£":       GBP,
 }
 
 var msgTemplate *regexp.Regexp
@@ -46,16 +54,22 @@ var msgTemplate *regexp.Regexp
 func init() {
 	firstCurKeys := make([]string, 0, len(firstCurPatterns))
 	for k := range firstCurPatterns {
+		if k == "$" {
+			k = `\$`
+		}
 		firstCurKeys = append(firstCurKeys, k)
 	}
 
 	secCurKeys := make([]string, 0, len(secCurPatterns))
 	for k := range secCurPatterns {
+		if k == "$" {
+			k = `\$`
+		}
 		secCurKeys = append(secCurKeys, k)
 	}
 
 	msgTemplate = regexp.MustCompile(fmt.Sprintf(
-		`^(\d+)\s(%s)\sв\s(%s)$`,
+		`^(\d+)\s?(%s)\sв\s(%s)$`,
 		strings.Join(firstCurKeys, "|"), strings.Join(secCurKeys, "|"),
 	))
 }
