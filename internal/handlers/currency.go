@@ -69,7 +69,7 @@ func init() {
 	}
 
 	msgTemplate = regexp.MustCompile(fmt.Sprintf(
-		`^(\d+)\s?(%s)\sв\s(%s)$`,
+		`^(\d+\.?\d?\d?)\s?(%s)\sв\s(%s)$`,
 		strings.Join(firstCurKeys, "|"), strings.Join(secCurKeys, "|"),
 	))
 }
