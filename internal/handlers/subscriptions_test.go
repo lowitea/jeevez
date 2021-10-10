@@ -317,10 +317,8 @@ func TestCmdSubscription(t *testing.T) {
 		SubscriptionName: "covid19-moscow",
 		Confirmed:        10,
 		Deaths:           101,
-		Recovered:        1010,
 		ConfirmedDiff:    23,
 		DeathsDiff:       32,
-		RecoveredDiff:    56,
 		LastUpdate:       "2021-04-18 04:20:41",
 		Active:           45,
 		ActiveDiff:       54,
@@ -335,7 +333,6 @@ func TestCmdSubscription(t *testing.T) {
 			"2021-04-18 04:20:41\n\n"+
 			"Подтверждённые: 10 (+23)\n"+
 			"Смерти: 101 (+32)\n"+
-			"Выздоровевшие: 1010 (+56)\n"+
 			"Болеющие: 45 (+54)\n"+
 			"Летальность: 99.900000\n\n"+
 			"https://yandex.ru/covid19/stat",

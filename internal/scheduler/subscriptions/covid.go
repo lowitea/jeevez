@@ -24,8 +24,6 @@ func GetMessage(stat models.CovidStat) string {
 		"({{if gt .Stat.ConfirmedDiff 0}}+{{end}}{{ .Stat.ConfirmedDiff }})\n" +
 		"Смерти: {{ .Stat.Deaths }} " +
 		"({{if gt .Stat.DeathsDiff 0}}+{{end}}{{ .Stat.DeathsDiff }})\n" +
-		"Выздоровевшие: {{ .Stat.Recovered }} " +
-		"({{if gt .Stat.RecoveredDiff 0}}+{{end}}{{ .Stat.RecoveredDiff }})\n" +
 		"Болеющие: {{ .Stat.Active }} " +
 		"({{if gt .Stat.ActiveDiff 0}}+{{end}}{{ .Stat.ActiveDiff }})\n" +
 		"Летальность: {{ printf \"%.6f\" .Stat.FatalityRate }}\n\n" +

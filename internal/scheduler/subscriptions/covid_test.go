@@ -13,10 +13,8 @@ var testCovidStat = models.CovidStat{
 	HumanName:        "Test Stat",
 	Confirmed:        100,
 	Deaths:           10001,
-	Recovered:        11,
 	ConfirmedDiff:    110,
 	DeathsDiff:       1101,
-	RecoveredDiff:    10101,
 	LastUpdate:       "10-02-2010",
 	Active:           1,
 	ActiveDiff:       101,
@@ -27,7 +25,6 @@ const testCovidMsg = "\U0001F9A0 <b>COVID-19 Статистика [Test Stat]</b
 	"10-02-2010\n\n" +
 	"Подтверждённые: 100 (+110)\n" +
 	"Смерти: 10001 (+1101)\n" +
-	"Выздоровевшие: 11 (+10101)\n" +
 	"Болеющие: 1 (+101)\n" +
 	"Летальность: 111.000000\n\n" +
 	"https://yandex.ru/covid19/stat"

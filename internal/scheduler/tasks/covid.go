@@ -15,10 +15,8 @@ import (
 type covidStat struct {
 	Confirmed     int64   `json:"confirmed"`
 	Deaths        int64   `json:"deaths"`
-	Recovered     int64   `json:"recovered"`
 	ConfirmedDiff int64   `json:"confirmed_diff"`
 	DeathsDiff    int64   `json:"deaths_diff"`
-	RecoveredDiff int64   `json:"recovered_diff"`
 	LastUpdate    string  `json:"last_update"`
 	Active        int64   `json:"active"`
 	ActiveDiff    int64   `json:"active_diff"`
@@ -31,8 +29,6 @@ func (stat *covidStat) Update(updStat covidStat) *covidStat {
 	stat.ConfirmedDiff += updStat.ConfirmedDiff
 	stat.Deaths += updStat.Deaths
 	stat.DeathsDiff += updStat.DeathsDiff
-	stat.Recovered += updStat.Recovered
-	stat.RecoveredDiff += updStat.RecoveredDiff
 	stat.LastUpdate = updStat.LastUpdate
 	stat.Active += updStat.Active
 	stat.ActiveDiff += updStat.ActiveDiff
@@ -124,10 +120,8 @@ func CovidTask(db *gorm.DB) {
 			HumanName:        statConf.HumanName,
 			Confirmed:        respStat.Confirmed,
 			Deaths:           respStat.Deaths,
-			Recovered:        respStat.Recovered,
 			ConfirmedDiff:    respStat.ConfirmedDiff,
 			DeathsDiff:       respStat.DeathsDiff,
-			RecoveredDiff:    respStat.RecoveredDiff,
 			LastUpdate:       respStat.LastUpdate,
 			Active:           respStat.Active,
 			ActiveDiff:       respStat.ActiveDiff,

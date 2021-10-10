@@ -14,17 +14,17 @@ import (
 // TestCovidStat_Update проверяет функцию обновления объекта статистики
 func TestCovidStat_Update(t *testing.T) {
 	stat := covidStat{
-		Confirmed: 1, Deaths: 2, Recovered: 3, ConfirmedDiff: 4, DeathsDiff: 5,
-		RecoveredDiff: 6, LastUpdate: "9.01.20", Active: 7, ActiveDiff: 8, FatalityRate: 0.5,
+		Confirmed: 1, Deaths: 2, ConfirmedDiff: 4, DeathsDiff: 5,
+		LastUpdate: "9.01.20", Active: 7, ActiveDiff: 8, FatalityRate: 0.5,
 	}
 	statNew := covidStat{
-		Confirmed: 11, Deaths: 12, Recovered: 13, ConfirmedDiff: 14, DeathsDiff: 15,
-		RecoveredDiff: 16, LastUpdate: "10.01.20", Active: 17, ActiveDiff: 18, FatalityRate: 0.8,
+		Confirmed: 11, Deaths: 12, ConfirmedDiff: 14, DeathsDiff: 15,
+		LastUpdate: "10.01.20", Active: 17, ActiveDiff: 18, FatalityRate: 0.8,
 	}
 	stat.Update(statNew)
 	statExp := covidStat{
-		Confirmed: 12, Deaths: 14, Recovered: 16, ConfirmedDiff: 18, DeathsDiff: 20,
-		RecoveredDiff: 22, LastUpdate: "10.01.20", Active: 24, ActiveDiff: 26, FatalityRate: 0.65,
+		Confirmed: 12, Deaths: 14, ConfirmedDiff: 18, DeathsDiff: 20,
+		LastUpdate: "10.01.20", Active: 24, ActiveDiff: 26, FatalityRate: 0.65,
 	}
 	assert.Equal(t, statExp, stat)
 
@@ -63,10 +63,8 @@ var validCovidResp = http.Response{Body: fakeBody{
 var validStat = covidStat{
 	Confirmed:     976739,
 	Deaths:        15007,
-	Recovered:     895879,
 	ConfirmedDiff: 1825,
 	DeathsDiff:    41,
-	RecoveredDiff: 2008,
 	LastUpdate:    "2021-02-28 05:22:20",
 	Active:        65853,
 	ActiveDiff:    -224,
@@ -148,10 +146,8 @@ func TestCovidTask(t *testing.T) {
 	for _, s := range stats {
 		assert.Equal(t, validStat.Confirmed, s.Confirmed)
 		assert.Equal(t, validStat.Deaths, s.Deaths)
-		assert.Equal(t, validStat.Recovered, s.Recovered)
 		assert.Equal(t, validStat.ConfirmedDiff, s.ConfirmedDiff)
 		assert.Equal(t, validStat.DeathsDiff, s.DeathsDiff)
-		assert.Equal(t, validStat.RecoveredDiff, s.RecoveredDiff)
 		assert.Equal(t, validStat.LastUpdate, s.LastUpdate)
 		assert.Equal(t, validStat.Active, s.Active)
 		assert.Equal(t, validStat.ActiveDiff, s.ActiveDiff)
@@ -175,10 +171,8 @@ func TestCovidTask(t *testing.T) {
 	for _, s := range stats {
 		assert.Equal(t, int64(0), s.Confirmed)
 		assert.Equal(t, int64(0), s.Deaths)
-		assert.Equal(t, int64(0), s.Recovered)
 		assert.Equal(t, int64(0), s.ConfirmedDiff)
 		assert.Equal(t, int64(0), s.DeathsDiff)
-		assert.Equal(t, int64(0), s.RecoveredDiff)
 		assert.Equal(t, "2021-03-28 05:22:20", s.LastUpdate)
 		assert.Equal(t, int64(0), s.Active)
 		assert.Equal(t, int64(0), s.ActiveDiff)
