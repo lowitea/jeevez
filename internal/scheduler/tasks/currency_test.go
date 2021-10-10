@@ -61,7 +61,8 @@ func TestCurrencyTask(t *testing.T) {
 	var rates []models.CurrencyRate
 	db.Find(&rates)
 
-	assert.Len(t, rates, 6)
+	expRatesCount := len(currencies) * (len(currencies) - 1)
+	assert.Len(t, rates, expRatesCount)
 	for _, r := range rates {
 		assert.Equal(t, 0.01183, r.Value)
 	}
@@ -74,7 +75,7 @@ func TestCurrencyTask(t *testing.T) {
 
 	db.Find(&rates)
 
-	assert.Len(t, rates, 6)
+	assert.Len(t, rates, expRatesCount)
 	for _, r := range rates {
 		assert.Equal(t, 0.42, r.Value)
 	}

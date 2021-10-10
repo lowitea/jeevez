@@ -14,6 +14,52 @@ import (
 	"strings"
 )
 
+const (
+	USD = "USD"
+	RUB = "RUB"
+	EUR = "EUR"
+	GBP = "GBP"
+)
+
+var firstCurPatterns = map[string]string{
+	"доллар":   USD,
+	"долларов": USD,
+	"доллара":  USD,
+	"рубль":    RUB,
+	"рублей":   RUB,
+	"рубля":    RUB,
+	"евро":     EUR,
+	"фунт":     GBP,
+	"фунтов":   GBP,
+	"фунта":    GBP,
+}
+
+var secCurPatterns = map[string]string{
+	"доллары": USD,
+	"рубли":   RUB,
+	"евро":    EUR,
+	"фунты":   GBP,
+}
+
+var msgTemplate *regexp.Regexp
+
+func init() {
+	firstCurKeys := make([]string, 0, len(firstCurPatterns))
+	for k := range firstCurPatterns {
+		firstCurKeys = append(firstCurKeys, k)
+	}
+
+	secCurKeys := make([]string, 0, len(secCurPatterns))
+	for k := range secCurPatterns {
+		secCurKeys = append(secCurKeys, k)
+	}
+
+	msgTemplate = regexp.MustCompile(fmt.Sprintf(
+		`^(\d+)\s(%s)\sв\s(%s)$`,
+		strings.Join(firstCurKeys, "|"), strings.Join(secCurKeys, "|"),
+	))
+}
+
 // getCurrencyRate получает и возвращает валюту из базы
 func getCurrencyRate(db *gorm.DB, curPair string) (float64, error) {
 	var currencyRate models.CurrencyRate
@@ -29,26 +75,6 @@ func getCurrencyRate(db *gorm.DB, curPair string) (float64, error) {
 
 // getCurPair функция принимающая введённые пользователем названия валют и возвращающая имя пары
 func getCurPair(firstCur string, secCur string) string {
-	USD := "USD"
-	RUB := "RUB"
-	EUR := "EUR"
-
-	firstCurPatterns := map[string]string{
-		"доллар":   USD,
-		"долларов": USD,
-		"доллара":  USD,
-		"рубль":    RUB,
-		"рублей":   RUB,
-		"рубля":    RUB,
-		"евро":     EUR,
-	}
-
-	secCurPatterns := map[string]string{
-		"доллары": USD,
-		"рубли":   RUB,
-		"евро":    EUR,
-	}
-
 	firstElem := firstCurPatterns[firstCur]
 	secElem := secCurPatterns[secCur]
 
@@ -126,10 +152,7 @@ func CurrencyConverterHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.
 		return
 	}
 
-	expMsg := regexp.MustCompile(
-		`^(\d+)\s(доллар|долларов|доллара|рубль|рублей|рубля|евро)\sв\s(рубли|доллары|евро)$`)
-
-	tokens := expMsg.FindStringSubmatch(update.Message.Text)
+	tokens := msgTemplate.FindStringSubmatch(update.Message.Text)
 
 	if tokens == nil {
 		return

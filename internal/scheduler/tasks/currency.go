@@ -13,16 +13,22 @@ import (
 	"strconv"
 )
 
-// CurrencyPairs доступные валютные пары, по которым запрашиваются данные
-var CurrencyPairs = [...]string{
-	"USD_RUB",
-	"USD_EUR",
+var currencies = [...]string{
+	"USD", "RUB", "EUR", "GBP",
+}
 
-	"RUB_USD",
-	"RUB_EUR",
+// currencyPairs доступные валютные пары, по которым запрашиваются данные
+var currencyPairs = make([]string, 0, len(currencies)*(len(currencies)-1))
 
-	"EUR_USD",
-	"EUR_RUB",
+func init() {
+	for _, firstCur := range currencies {
+		for _, secCur := range currencies {
+			if firstCur == secCur {
+				continue
+			}
+			currencyPairs = append(currencyPairs, fmt.Sprintf("%s_%s", firstCur, secCur))
+		}
+	}
 }
 
 // getCurrencyRate получает валютные пары из апи
@@ -72,7 +78,7 @@ func CurrencyTask(db *gorm.DB) {
 		Path:   config.CurrencyAPIPath,
 	}
 
-	for _, curPair := range CurrencyPairs {
+	for _, curPair := range currencyPairs {
 		curURL := baseURL
 		token := config.Cfg.CurrencyAPI.Token
 		curURL.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, token)
