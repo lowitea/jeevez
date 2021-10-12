@@ -19,6 +19,7 @@ const (
 	RUB = "RUB"
 	EUR = "EUR"
 	GBP = "GBP"
+	PLN = "PLN"
 )
 
 var firstCurPatterns = map[string]string{
@@ -36,6 +37,9 @@ var firstCurPatterns = map[string]string{
 	"фунтов":   GBP,
 	"фунта":    GBP,
 	"£":        GBP,
+	"злотый":   PLN,
+	"злотых":   PLN,
+	"zł":       PLN,
 }
 
 var secCurPatterns = map[string]string{
@@ -47,6 +51,8 @@ var secCurPatterns = map[string]string{
 	"€":       EUR,
 	"фунты":   GBP,
 	"£":       GBP,
+	"злотые":  PLN,
+	"zł":      PLN,
 }
 
 var msgTemplate *regexp.Regexp

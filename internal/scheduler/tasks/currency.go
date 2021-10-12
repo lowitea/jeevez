@@ -14,7 +14,7 @@ import (
 )
 
 var currencies = [...]string{
-	"USD", "RUB", "EUR", "GBP",
+	"USD", "RUB", "EUR", "GBP", "PLN",
 }
 
 // currencyPairs доступные валютные пары, по которым запрашиваются данные
