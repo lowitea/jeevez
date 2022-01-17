@@ -89,9 +89,20 @@ func TestProcessUpdate(t *testing.T) {
 	db := testtools.InitTestDB()
 	update := testtools.NewUpdate("no_command")
 	botAPIMock := testtools.NewBotAPIMock(tgbotapi.MessageConfig{})
-	assert.NotPanics(t, func() { processUpdate(update, botAPIMock, db) })
+	cfg := &config.Config{Telegram: struct {
+		Token string `required:"true"`
+		Admin int64  `required:"true"`
+	}{}}
+
+	dep := &appDepContainer{
+		db:  db,
+		bot: botAPIMock,
+		cfg: cfg,
+	}
+
+	assert.NotPanics(t, func() { processUpdate(update, dep) })
 	botAPIMock.AssertNotCalled(t, "Send")
 
-	assert.NotPanics(t, func() { processUpdate(tgbotapi.Update{}, botAPIMock, db) })
+	assert.NotPanics(t, func() { processUpdate(tgbotapi.Update{}, dep) })
 	botAPIMock.AssertNotCalled(t, "Send")
 }
