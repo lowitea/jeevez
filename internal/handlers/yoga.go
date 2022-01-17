@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/scheduler/subscriptions"
 	"github.com/lowitea/jeevez/internal/structs"
@@ -14,7 +14,7 @@ func YogaCallbackHandler(update tgbotapi.Update, bot structs.Bot) {
 		return
 	}
 
-	_, _ = bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
+	_, _ = bot.Request(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
 
 	nextMsg := "\n\nДля продолжения нажми: /yoga"
 

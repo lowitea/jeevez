@@ -2,7 +2,7 @@ package scheduler
 
 import (
 	"github.com/go-co-op/gocron"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/scheduler/subscriptions"
 	"github.com/lowitea/jeevez/internal/scheduler/tasks"
 	"time"

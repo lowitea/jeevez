@@ -3,7 +3,7 @@ package handlers
 import (
 	"bytes"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/structs"
 	"github.com/wayneashleyberry/eeemo/pkg/zalgo"
 	"sort"

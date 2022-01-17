@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/structs"
 	"math/rand"

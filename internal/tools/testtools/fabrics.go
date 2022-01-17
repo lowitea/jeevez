@@ -1,6 +1,6 @@
 package testtools
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 
 func NewUpdate(text string) tgbotapi.Update {
 	chat := tgbotapi.Chat{ID: 1}

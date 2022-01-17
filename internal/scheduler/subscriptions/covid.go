@@ -2,7 +2,7 @@ package subscriptions
 
 import (
 	"bytes"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/structs"
 	"github.com/lowitea/jeevez/internal/tools"

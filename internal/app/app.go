@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/handlers"
 	"github.com/lowitea/jeevez/internal/scheduler"
@@ -83,7 +83,7 @@ func Run() {
 		log.Panicf("error init app %s\n", err)
 	}
 
-	updates, _ := depContainer.bot.GetUpdatesChan(*depContainer.updateConfig)
+	updates := depContainer.bot.GetUpdatesChan(*depContainer.updateConfig)
 	releaseNotify(depContainer.bot, depContainer.cfg.Telegram.Admin, depContainer.cfg.App.Version)
 
 	// запуск обработки сообщений

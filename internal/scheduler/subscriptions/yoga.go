@@ -3,7 +3,7 @@ package subscriptions
 import (
 	"embed"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
@@ -101,7 +101,7 @@ func YogaTestTask(bot structs.Bot, _ *gorm.DB, _ models.Subscription, chatTgID i
 	imgPath := path.Join("static", "yoga", yogaPoses[validPose])
 	img, _ := yogaImages.ReadFile(imgPath)
 
-	msg := tgbotapi.NewPhotoUpload(chatTgID, tgbotapi.FileBytes{Name: yogaPoses[validPose], Bytes: img})
+	msg := tgbotapi.NewPhoto(chatTgID, tgbotapi.FileBytes{Name: yogaPoses[validPose], Bytes: img})
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(variants...)
 	_, _ = bot.Send(msg)
 }
