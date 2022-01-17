@@ -9,6 +9,16 @@ import (
 	"log"
 )
 
+// UpdateChatInfoHandler обновляет информацию о чате
+func UpdateChatInfoHandler(update tgbotapi.Update, db *gorm.DB) {
+	var chat models.Chat
+	db.First(&chat, "tg_id = ?", update.Message.Chat.ID)
+	chat.TgName = update.Message.Chat.UserName
+	chat.TgTitle = update.Message.Chat.Title
+	chat.TgType = update.Message.Chat.Type
+	db.Save(&chat)
+}
+
 // StartHandler обрабатывает команду /start добавляет чатик в базу
 func StartHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	if update.Message.Text != "/start" {

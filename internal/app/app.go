@@ -20,18 +20,24 @@ type appDepContainer struct {
 }
 
 // processUpdate обрабатывает полученный апдейт
-func processUpdate(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
+func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 	// пропускаем, если сообщения нет
 	if update.Message != nil {
-		go handlers.StartHandler(update, bot, db)
-		go handlers.BaseCommandHandler(update, bot)
-		go handlers.CurrencyConverterHandler(update, bot, db)
-		go handlers.SwitchHandler(update, bot)
-		go handlers.SubscriptionsHandler(update, bot, db)
-		go handlers.DecorateTextHandler(update, bot)
-		go handlers.YogaHandler(update, bot)
+		go handlers.UpdateChatInfoHandler(update, dep.db)
+
+		go handlers.StartHandler(update, dep.bot, dep.db)
+		go handlers.BaseCommandHandler(update, dep.bot)
+		go handlers.CurrencyConverterHandler(update, dep.bot, dep.db)
+		go handlers.SwitchHandler(update, dep.bot)
+		go handlers.SubscriptionsHandler(update, dep.bot, dep.db)
+		go handlers.DecorateTextHandler(update, dep.bot)
+		go handlers.YogaHandler(update, dep.bot)
+
+		if update.Message.Chat.ID == dep.cfg.Telegram.Admin {
+			go handlers.ChatListHandler(update, dep.bot, dep.db)
+		}
 	} else if update.CallbackQuery != nil {
-		go handlers.YogaCallbackHandler(update, bot)
+		go handlers.YogaCallbackHandler(update, dep.bot)
 	}
 }
 
@@ -88,6 +94,6 @@ func Run() {
 
 	// запуск обработки сообщений
 	for update := range updates {
-		processUpdate(update, depContainer.bot, depContainer.db)
+		processUpdate(update, depContainer)
 	}
 }
