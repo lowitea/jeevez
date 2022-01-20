@@ -9,6 +9,8 @@ type Chat struct {
 	ID            int64 `gorm:"primaryKey"`
 	TgID          int64 `gorm:"uniqueIndex"`
 	TgName        string
+	TgFirstName   string
+	TgLastName    string
 	TgTitle       string
 	TgType        string
 	RegisteredAt  time.Time      `gorm:"autoCreateTime"`

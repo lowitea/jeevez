@@ -36,5 +36,6 @@ const (
 		"многих поз на санскрите\n" +
 		"/yoga - выведет фотографию и варианты ответа"
 
-	HTML = "HTML"
+	HTML     = "HTML"
+	MARKDOWN = "MARKDOWN"
 )

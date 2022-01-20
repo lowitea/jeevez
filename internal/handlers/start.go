@@ -14,11 +14,15 @@ func UpdateChatInfoHandler(update tgbotapi.Update, db *gorm.DB) {
 	var chat models.Chat
 	chat.TgID = update.Message.Chat.ID
 	chat.TgName = update.Message.Chat.UserName
+	chat.TgFirstName = update.Message.Chat.FirstName
+	chat.TgLastName = update.Message.Chat.LastName
 	chat.TgTitle = update.Message.Chat.Title
 	chat.TgType = update.Message.Chat.Type
 	clauses := db.Clauses(clause.OnConflict{
-		Columns:   []clause.Column{{Name: "tg_id"}},
-		DoUpdates: clause.AssignmentColumns([]string{"tg_name", "tg_title", "tg_type"}),
+		Columns: []clause.Column{{Name: "tg_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"tg_name", "tg_first_name", "tg_last_name", "tg_title", "tg_type",
+		}),
 	})
 	clauses.Create(&chat)
 }

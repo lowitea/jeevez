@@ -33,7 +33,7 @@ func me(update tgbotapi.Update, bot structs.Bot) {
 	msgText := fmt.Sprintf("Твой id: `%d`\nID чата: `%d`", update.Message.From.ID, update.Message.Chat.ID)
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
 	msg.ReplyToMessageID = update.Message.MessageID
-	msg.ParseMode = "MARKDOWN"
+	msg.ParseMode = MARKDOWN
 	_, _ = bot.Send(msg)
 }
 

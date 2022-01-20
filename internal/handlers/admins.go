@@ -22,9 +22,15 @@ func ChatListHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 
 	var msgTextB bytes.Buffer
 	for _, c := range chats {
-		msgTextB.WriteString(fmt.Sprintf("%d  - ", c.TgID))
+		msgTextB.WriteString(fmt.Sprintf("`%d` - ", c.TgID))
 		if c.TgTitle != "" {
 			msgTextB.WriteString(fmt.Sprintf("%s ", c.TgTitle))
+		}
+		if c.TgFirstName != "" {
+			msgTextB.WriteString(fmt.Sprintf("%s ", c.TgFirstName))
+		}
+		if c.TgLastName != "" {
+			msgTextB.WriteString(fmt.Sprintf("%s ", c.TgLastName))
 		}
 		if c.TgName != "" {
 			msgTextB.WriteString(fmt.Sprintf("@%s ", c.TgName))
@@ -33,6 +39,7 @@ func ChatListHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgTextB.String())
+	msg.ParseMode = MARKDOWN
 	msg.ReplyToMessageID = update.Message.MessageID
 	_, _ = bot.Send(msg)
 }
