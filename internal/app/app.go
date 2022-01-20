@@ -33,7 +33,7 @@ func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 		go handlers.DecorateTextHandler(update, dep.bot)
 		go handlers.YogaHandler(update, dep.bot)
 
-		if update.Message.Chat.ID == dep.cfg.Telegram.Admin {
+		if update.Message.From.ID == dep.cfg.Telegram.Admin {
 			go handlers.ChatListHandler(update, dep.bot, dep.db)
 		}
 	} else if update.CallbackQuery != nil {

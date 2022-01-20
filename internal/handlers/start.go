@@ -12,11 +12,15 @@ import (
 // UpdateChatInfoHandler обновляет информацию о чате
 func UpdateChatInfoHandler(update tgbotapi.Update, db *gorm.DB) {
 	var chat models.Chat
-	db.First(&chat, "tg_id = ?", update.Message.Chat.ID)
+	chat.TgID = update.Message.Chat.ID
 	chat.TgName = update.Message.Chat.UserName
 	chat.TgTitle = update.Message.Chat.Title
 	chat.TgType = update.Message.Chat.Type
-	db.Save(&chat)
+	clauses := db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "tg_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"tg_name", "tg_title", "tg_type"}),
+	})
+	clauses.Create(&chat)
 }
 
 // StartHandler обрабатывает команду /start добавляет чатик в базу
