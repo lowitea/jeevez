@@ -34,7 +34,6 @@ func checkBotName(update *tgbotapi.Update, botName string) bool {
 func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 	// пропускаем, если сообщения нет
 	if update.Message != nil {
-
 		// пропускаем, если сообщение отправлено не нам
 		if !checkBotName(&update, dep.cfg.Telegram.BotName) {
 			return
