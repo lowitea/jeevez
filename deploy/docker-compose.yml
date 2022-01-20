@@ -9,6 +9,7 @@ services:
     environment:
       - JEEVEZ_TELEGRAM_TOKEN
       - JEEVEZ_TELEGRAM_ADMIN
+      - JEEVEZ_TELEGRAM_BOTNAME
 
       - JEEVEZ_DB_HOST
       - JEEVEZ_DB_PORT
