@@ -15,9 +15,10 @@ import (
 func TestInitApp(t *testing.T) {
 	testCfg := config.Config{
 		Telegram: struct {
-			Token string `required:"true"`
-			Admin int64  `required:"true"`
-		}{"1", 1},
+			BotName string `required:"true"`
+			Token   string `required:"true"`
+			Admin   int64  `required:"true"`
+		}{"", "1", 1},
 		DB: struct {
 			Host     string `default:"jeevez-database"`
 			Port     int    `default:"5432"`
@@ -90,8 +91,9 @@ func TestProcessUpdate(t *testing.T) {
 	update := testtools.NewUpdate("no_command")
 	botAPIMock := testtools.NewBotAPIMock(tgbotapi.MessageConfig{})
 	cfg := &config.Config{Telegram: struct {
-		Token string `required:"true"`
-		Admin int64  `required:"true"`
+		BotName string `required:"true"`
+		Token   string `required:"true"`
+		Admin   int64  `required:"true"`
 	}{}}
 
 	dep := &appDepContainer{

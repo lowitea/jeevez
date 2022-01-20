@@ -23,7 +23,7 @@ type appDepContainer struct {
 // checkBotName проверяет что сообщение адресовано именно этому боту
 func checkBotName(update *tgbotapi.Update, botName string) bool {
 	args := strings.Split(update.Message.Text, "@")
-	if args[1] != botName {
+	if len(args) == 2 && args[1] != botName {
 		return false
 	}
 	update.Message.Text = args[0]

@@ -13,9 +13,10 @@ import (
 func TestRunner(t *testing.T) {
 	testCfg := config.Config{
 		Telegram: struct {
-			Token string `required:"true"`
-			Admin int64  `required:"true"`
-		}{"1", 1},
+			BotName string `required:"true"`
+			Token   string `required:"true"`
+			Admin   int64  `required:"true"`
+		}{"", "1", 1},
 		DB: struct {
 			Host     string `default:"jeevez-database"`
 			Port     int    `default:"5432"`
