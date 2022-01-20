@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/structs"
@@ -28,10 +29,19 @@ func cmdRoll(update tgbotapi.Update, bot structs.Bot) {
 	_, _ = bot.Send(msg)
 }
 
+func me(update tgbotapi.Update, bot structs.Bot) {
+	msgText := fmt.Sprintf("Твой id: `%d`\nID чата: `%d`", update.Message.From.ID, update.Message.Chat.ID)
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+	msg.ReplyToMessageID = update.Message.MessageID
+	msg.ParseMode = "MARKDOWN"
+	_, _ = bot.Send(msg)
+}
+
 var cmdFuncMap = map[string]func(update tgbotapi.Update, bot structs.Bot){
 	"/version": cmdVersion,
 	"/help":    cmdHelp,
 	"/roll":    cmdRoll,
+	"/me":      me,
 }
 
 // BaseCommandHandler базовый обработчик для выполнения команд. получает сообщение
