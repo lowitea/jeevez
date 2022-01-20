@@ -41,7 +41,6 @@ func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 		}
 
 		go handlers.UpdateChatInfoHandler(update, dep.db)
-
 		go handlers.StartHandler(update, dep.bot, dep.db)
 		go handlers.BaseCommandHandler(update, dep.bot)
 		go handlers.CurrencyConverterHandler(update, dep.bot, dep.db)
@@ -50,8 +49,11 @@ func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 		go handlers.DecorateTextHandler(update, dep.bot)
 		go handlers.YogaHandler(update, dep.bot)
 
+		// команды для админского аккаунта
 		if update.Message.From.ID == dep.cfg.Telegram.Admin {
+			go handlers.AdminHelpHandler(update, dep.bot)
 			go handlers.ChatListHandler(update, dep.bot, dep.db)
+			go handlers.DeleteChatHandler(update, dep.bot, dep.db)
 		}
 	} else if update.CallbackQuery != nil {
 		go handlers.YogaCallbackHandler(update, dep.bot)
