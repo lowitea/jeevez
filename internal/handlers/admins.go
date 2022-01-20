@@ -41,7 +41,8 @@ func ChatListHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgTextB.String())
 	msg.ParseMode = MARKDOWN
 	msg.ReplyToMessageID = update.Message.MessageID
-	_, _ = bot.Send(msg)
+	_, err := bot.Send(msg)
+	fmt.Println(err)
 }
 
 // DeleteChatHandler удаляет чат
