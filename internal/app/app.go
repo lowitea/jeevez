@@ -10,6 +10,7 @@ import (
 	"github.com/lowitea/jeevez/internal/tools"
 	"gorm.io/gorm"
 	"log"
+	"strings"
 )
 
 type appDepContainer struct {
@@ -19,10 +20,26 @@ type appDepContainer struct {
 	cfg          *config.Config
 }
 
+// checkBotName проверяет что сообщение адресовано именно этому боту
+func checkBotName(update *tgbotapi.Update, botName string) bool {
+	args := strings.Split(update.Message.Text, "@")
+	if args[1] != botName {
+		return false
+	}
+	update.Message.Text = args[0]
+	return true
+}
+
 // processUpdate обрабатывает полученный апдейт
 func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 	// пропускаем, если сообщения нет
 	if update.Message != nil {
+
+		// пропускаем, если сообщение отправлено не нам
+		if !checkBotName(&update, dep.cfg.Telegram.BotName) {
+			return
+		}
+
 		go handlers.UpdateChatInfoHandler(update, dep.db)
 
 		go handlers.StartHandler(update, dep.bot, dep.db)

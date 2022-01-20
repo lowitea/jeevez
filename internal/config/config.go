@@ -9,8 +9,9 @@ type Config struct {
 		Version string `default:"x.x.x (dev)"`
 	}
 	Telegram struct {
-		Token string `required:"true"`
-		Admin int64  `required:"true"`
+		BotName string `required:"true"`
+		Token   string `required:"true"`
+		Admin   int64  `required:"true"`
 	}
 	DB struct {
 		Host     string `default:"jeevez-database"`
