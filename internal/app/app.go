@@ -20,10 +20,16 @@ type appDepContainer struct {
 	cfg          *config.Config
 }
 
-// checkBotName проверяет что сообщение адресовано именно этому боту
-func checkBotName(update *tgbotapi.Update, botName string) bool {
+// checkRecipient проверяет что сообщение адресовано именно этому боту
+func checkRecipient(update *tgbotapi.Update, botName string) bool {
 	args := strings.Split(update.Message.Text, "@")
-	if len(args) == 2 && args[1] != botName {
+
+	if update.Message.Chat.IsPrivate() {
+		update.Message.Text = args[0]
+		return true
+	}
+
+	if len(args) != 2 || args[1] != botName {
 		return false
 	}
 	update.Message.Text = args[0]
@@ -35,7 +41,7 @@ func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 	// пропускаем, если сообщения нет
 	if update.Message != nil {
 		// пропускаем, если сообщение отправлено не нам
-		if !checkBotName(&update, dep.cfg.Telegram.BotName) {
+		if !checkRecipient(&update, dep.cfg.Telegram.BotName) {
 			return
 		}
 
