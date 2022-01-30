@@ -21,6 +21,7 @@ func TestInitConfig(t *testing.T) {
 	t.Setenv("JEEVEZ_DB_USER", "test_user")
 	t.Setenv("JEEVEZ_DB_PASSWORD", "db_password")
 	t.Setenv("JEEVEZ_CURRENCYAPI_TOKEN", "currency_token")
+	t.Setenv("JEEVEZ_WEATHERAPI_TOKEN", "weather_token")
 	t.Setenv("JEEVEZ_TELEGRAM_BOTNAME", "test_bot")
 
 	expCfg := Config{
@@ -42,6 +43,9 @@ func TestInitConfig(t *testing.T) {
 		CurrencyAPI: struct {
 			Token string `required:"true"`
 		}{"currency_token"},
+		WeatherAPI: struct {
+			Token string `required:"true"`
+		}{"weather_token"},
 	}
 
 	cfg, err := InitConfig()

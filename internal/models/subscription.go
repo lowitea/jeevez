@@ -43,4 +43,9 @@ var SubscrNameSubscrMap = map[string]Subscription{
 		Name:        "yoga-test",
 		Description: "Ежедневный тест с позами йоги",
 	},
+	"weather-moscow": {
+		ID:          4,
+		Name:        "weather-moscow",
+		Description: "Текущая погода в Москве",
+	},
 }

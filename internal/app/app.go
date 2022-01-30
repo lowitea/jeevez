@@ -53,6 +53,7 @@ func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 		go handlers.SubscriptionsHandler(update, dep.bot, dep.db)
 		go handlers.DecorateTextHandler(update, dep.bot)
 		go handlers.YogaHandler(update, dep.bot)
+		go handlers.WeatherHandler(&update, dep.bot)
 
 		// команды для админского аккаунта
 		if update.Message.From.ID == dep.cfg.Telegram.Admin {

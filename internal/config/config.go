@@ -23,6 +23,9 @@ type Config struct {
 	CurrencyAPI struct {
 		Token string `required:"true"`
 	}
+	WeatherAPI struct {
+		Token string `required:"true"`
+	}
 }
 
 var Cfg Config

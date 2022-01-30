@@ -43,6 +43,7 @@ jobs:
           JEEVEZ_DB_USER=${{ secrets.JEEVEZ_DB_USER }} \
           JEEVEZ_DB_PASSWORD=${{ secrets.JEEVEZ_DB_PASSWORD }} \
           JEEVEZ_CURRENCYAPI_TOKEN=${{ secrets.JEEVEZ_CURRENCYAPI_TOKEN }} \
+          JEEVEZ_WEATHERAPI_TOKEN=${{ secrets.JEEVEZ_WEATHERAPI_TOKEN }} \
           docker-compose -f deploy/docker-compose.yml \
                          -f deploy/docker-compose.db.yml \
           	             --project-directory . \

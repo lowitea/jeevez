@@ -43,13 +43,15 @@ func TestCmdSubscriptions(t *testing.T) {
 		"Все доступные темы для подписки:\n"+
 			"\n<b>covid19-moscow</b> - Дневная статистика по COViD-19 по Москве"+
 			"\n<b>covid19-russia</b> - Дневная статистика по COViD-19 по России"+
+			"\n<b>weather-moscow</b> - Текущая погода в Москве"+
 			"\n<b>yoga-test</b> - Ежедневный тест с позами йоги"+
 			"\n\nПример команды для подписки:"+
 			"\n/subscribe covid19-russia 11:00"+
 			"\n\n\nТемы на которые Вы подписаны:\n"+
 			"\n- <b>covid19-russia [11:00]</b> - Дневная статистика по COViD-19 по России"+
 			"\n- <b>covid19-moscow [11:00]</b> - Дневная статистика по COViD-19 по Москве"+
-			"\n- <b>yoga-test [11:00]</b> - Ежедневный тест с позами йоги",
+			"\n- <b>yoga-test [11:00]</b> - Ежедневный тест с позами йоги"+
+			"\n- <b>weather-moscow [11:00]</b> - Текущая погода в Москве",
 	)
 	expMsg.ParseMode = HTML
 	botAPIMock := testtools.NewBotAPIMock(expMsg)
@@ -358,6 +360,7 @@ func TestSubscriptionsHandler(t *testing.T) {
 			"Все доступные темы для подписки:\n\n" +
 				"<b>covid19-moscow</b> - Дневная статистика по COViD-19 по Москве\n" +
 				"<b>covid19-russia</b> - Дневная статистика по COViD-19 по России\n" +
+				"<b>weather-moscow</b> - Текущая погода в Москве\n" +
 				"<b>yoga-test</b> - Ежедневный тест с позами йоги\n\n" +
 				"Пример команды для подписки:\n" +
 				"/subscribe covid19-russia 11:00\n\n",

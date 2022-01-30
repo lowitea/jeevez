@@ -14,4 +14,5 @@ var SubscriptionFuncMap = map[models.Subscription]TaskFunc{
 	models.SubscrNameSubscrMap["covid19-russia"]: CovidTask,
 	models.SubscrNameSubscrMap["covid19-moscow"]: CovidTask,
 	models.SubscrNameSubscrMap["yoga-test"]:      YogaTestTask,
+	models.SubscrNameSubscrMap["weather-moscow"]: WeatherTask,
 }
