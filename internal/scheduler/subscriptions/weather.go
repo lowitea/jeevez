@@ -116,6 +116,8 @@ func GetWeatherMessage(city string) string {
 		return "Я приношу свои извинения, но к сожалению метеостанция не отвечает 🤷"
 	}
 
+	loc, _ := time.LoadLocation("Europe/Moscow")
+
 	return fmt.Sprintf(
 		"🌡  %.0f° (ощущается %.0f°)\n"+
 			"%s  %s\n\n"+
@@ -127,8 +129,8 @@ func GetWeatherMessage(city string) string {
 		Icons[data.Weather[0].Icon], strings.Title(data.Weather[0].Description),
 		data.Main.Pressure, data.Main.Humidity,
 		data.Wind.Speed, data.Wind.Gust,
-		time.Unix(data.Sys.Sunrise, 0).Format("15:04:05"),
-		time.Unix(data.Sys.Sunset, 0).Format("15:04:05"),
+		time.Unix(data.Sys.Sunrise, 0).In(loc).Format("15:04:05"),
+		time.Unix(data.Sys.Sunset, 0).In(loc).Format("15:04:05"),
 	)
 }
 
