@@ -12,6 +12,5 @@ func WeatherHandler(update *tgbotapi.Update, bot structs.Bot) {
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, subscriptions.GetWeatherMessage("weather-moscow"))
-	msg.ReplyToMessageID = update.Message.MessageID
 	_, _ = bot.Send(msg)
 }

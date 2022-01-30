@@ -117,12 +117,12 @@ func GetWeatherMessage(city string) string {
 	}
 
 	return fmt.Sprintf(
-		"🌡 %.0f° (ощущается %.0f°)\n"+
-			"%s   %s\n\n"+
-			"🗜 Давление: %d мм рт. ст.\n"+
-			"💧 Влажность: %d%%\n\n"+
-			"💨 Ветер: %.1f м/c, порывы до %.1f м/c\n\n"+
-			"🌅 Восход: %s   🌇 Закат: %s\n",
+		"🌡  %.0f° (ощущается %.0f°)\n"+
+			"%s  %s\n\n"+
+			"🗜  Давление: %d мм рт. ст.\n"+
+			"💧  Влажность: %d%%\n\n"+
+			"💨  Ветер: %.1f м/c, порывы до %.1f м/c\n\n"+
+			"🌅  Восход: %s   🌇  Закат: %s\n",
 		data.Main.Temp, data.Main.FeelsLike,
 		Icons[data.Weather[0].Icon], strings.Title(data.Weather[0].Description),
 		data.Main.Pressure, data.Main.Humidity,
