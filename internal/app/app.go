@@ -57,7 +57,6 @@ func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 
 		// команды для админского аккаунта
 		if update.Message.From.ID == dep.cfg.Telegram.Admin {
-			go handlers.AdminHelpHandler(update, dep.bot)
 			go handlers.ChatListHandler(update, dep.bot, dep.db)
 			go handlers.DeleteChatHandler(update, dep.bot, dep.db)
 		}

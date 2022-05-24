@@ -43,3 +43,15 @@ build:  ## Сборка приложения
 .PHONY: run
 run:  ## Запуск проекта
 	go run cmd/jeevez/main.go
+
+start-devdb:  ## Запуск локальной базы данных для разработки
+	docker run \
+		--name psql-jeevez \
+		--rm \
+		--network host \
+		-d \
+		-e POSTGRES_PASSWORD=jeevez \
+		-e POSTGRES_USER=jeevez \
+		-e POSTGRES_DB=jeevez \
+		-v jeevez_db:/var/lib/postgresql/data \
+		postgres:13
