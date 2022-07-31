@@ -55,3 +55,10 @@ start-devdb:  ## Запуск локальной базы данных для р
 		-e POSTGRES_DB=jeevez \
 		-v jeevez_db:/var/lib/postgresql/data \
 		postgres:13
+
+host-setup:  ## Настраивает хост для выкатки
+	ansible-playbook \
+		-i deploy/host/ansible/hosts.yaml \
+		deploy/host/ansible/plays/base.yaml \
+		deploy/host/ansible/plays/docker.yaml \
+		deploy/host/ansible/plays/user.yaml

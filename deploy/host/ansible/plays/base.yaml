@@ -1,0 +1,8 @@
+---
+- hosts: scarlat
+  tasks:
+    - name: Install base packages
+      apt:
+        name: [ "gpg" ]
+        state: present
+        update_cache: yes

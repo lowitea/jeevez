@@ -1,0 +1,15 @@
+---
+- hosts: scarlat
+  tasks:
+    - name: Add the user jeevez_ci
+      user:
+        name: jeevez_ci
+        shell: /bin/bash
+        groups: docker
+        append: yes
+
+    - name: Set authorized key taken from file
+      authorized_key:
+        user: jeevez_ci
+        state: present
+        key: "{{ lookup('file', '/home/lowit/.ssh/id_ed25519.jeevez_ci.pub') }}"
