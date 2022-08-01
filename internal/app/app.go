@@ -10,7 +10,9 @@ import (
 	"github.com/lowitea/jeevez/internal/tools"
 	"gorm.io/gorm"
 	"log"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 type appDepContainer struct {
@@ -56,9 +58,10 @@ func processUpdate(update tgbotapi.Update, dep *appDepContainer) {
 		go handlers.WeatherHandler(&update, dep.bot)
 
 		// команды для админского аккаунта
-		if update.Message.From.ID == dep.cfg.Telegram.Admin {
+		if update.Message.From.ID == dep.cfg.Admin.TelegramID {
 			go handlers.ChatListHandler(update, dep.bot, dep.db)
 			go handlers.DeleteChatHandler(update, dep.bot, dep.db)
+			go handlers.CreateMailHandler(update, dep.bot)
 		}
 	} else if update.CallbackQuery != nil {
 		go handlers.YogaCallbackHandler(update, dep.bot)
@@ -69,6 +72,8 @@ func initApp(
 	initBotFunc func(token string) (*tgbotapi.BotAPI, error),
 	initCfgFunc func() (*config.Config, error),
 ) (*appDepContainer, error) {
+	rand.Seed(time.Now().UnixNano())
+
 	// инициализируем конфиг
 	cfg, err := initCfgFunc()
 	if err != nil {
@@ -114,7 +119,7 @@ func Run() {
 	}
 
 	updates := depContainer.bot.GetUpdatesChan(*depContainer.updateConfig)
-	releaseNotify(depContainer.bot, depContainer.cfg.Telegram.Admin, depContainer.cfg.App.Version)
+	releaseNotify(depContainer.bot, depContainer.cfg.Admin.TelegramID, depContainer.cfg.App.Version)
 
 	// запуск обработки сообщений
 	for update := range updates {

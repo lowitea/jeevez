@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/structs"
+	"github.com/lowitea/jeevez/internal/tools/mail"
 	"gorm.io/gorm"
+	mRand "math/rand"
 	"strconv"
 	"strings"
 )
@@ -64,6 +67,41 @@ func DeleteChatHandler(update tgbotapi.Update, bot structs.Bot, db *gorm.DB) {
 	}
 
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, msgText)
+	msg.ReplyToMessageID = update.Message.MessageID
+	_, _ = bot.Send(msg)
+}
+
+const (
+	tempMailboxNameLen = 3
+	tempMailboxPrefix  = "x."
+)
+
+var tempMailboxNameRunes = []rune("abcdefghijklmnopqrstuvwxyz")
+
+// CreateMailHandler создание почты
+func CreateMailHandler(update tgbotapi.Update, bot structs.Bot) {
+	args := strings.Split(update.Message.Text, " ")
+
+	if args[0] != "/mail" {
+		return
+	}
+
+	var mName, domain string
+	if len(args) != 2 {
+		b := make([]rune, tempMailboxNameLen)
+		for i := range b {
+			b[i] = tempMailboxNameRunes[mRand.Intn(len(tempMailboxNameRunes))]
+		}
+		mName = tempMailboxPrefix + string(b)
+		domain = config.Cfg.Mail.TempMailDomain
+	} else {
+		mName = args[1]
+		domain = config.Cfg.Mail.PrimaryDomain
+	}
+
+	go mail.CreateMail(domain, mName)
+
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, mName+"@"+domain)
 	msg.ReplyToMessageID = update.Message.MessageID
 	_, _ = bot.Send(msg)
 }

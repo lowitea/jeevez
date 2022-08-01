@@ -11,7 +11,6 @@ type Config struct {
 	Telegram struct {
 		BotName string `required:"true"`
 		Token   string `required:"true"`
-		Admin   int64  `required:"true"`
 	}
 	DB struct {
 		Host     string `default:"jeevez-database"`
@@ -25,6 +24,17 @@ type Config struct {
 	}
 	WeatherAPI struct {
 		Token string `required:"true"`
+	}
+	Admin struct {
+		TelegramID int64  `required:"true"`
+		Email      string `required:"true"`
+	}
+	Mail struct {
+		Host           string `required:"true"`
+		Login          string `required:"true"`
+		Password       string `required:"true"`
+		PrimaryDomain  string `required:"true"`
+		TempMailDomain string `required:"true"`
 	}
 }
 

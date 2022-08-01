@@ -18,7 +18,7 @@ func cmdVersion(update tgbotapi.Update, bot structs.Bot) {
 // cmdHelp вывод справки по боту
 func cmdHelp(update tgbotapi.Update, bot structs.Bot) {
 	text := HelpText
-	if update.Message.From.ID == config.Cfg.Telegram.Admin {
+	if update.Message.From.ID == config.Cfg.Admin.TelegramID {
 		text += "\n\n\n⚠ Команды администратора:\n\n" + AdminHelpText
 	}
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
