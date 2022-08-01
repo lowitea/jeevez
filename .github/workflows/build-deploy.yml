@@ -39,11 +39,17 @@ jobs:
           JEEVEZ_APP_VERSION=${{ github.event.release.tag_name }} \
           JEEVEZ_TELEGRAM_BOTNAME=${{ secrets.JEEVEZ_TELEGRAM_BOTNAME }} \
           JEEVEZ_TELEGRAM_TOKEN=${{ secrets.JEEVEZ_TELEGRAM_TOKEN }} \
-          JEEVEZ_TELEGRAM_ADMIN=${{ secrets.JEEVEZ_TELEGRAM_ADMIN }} \
           JEEVEZ_DB_USER=${{ secrets.JEEVEZ_DB_USER }} \
           JEEVEZ_DB_PASSWORD=${{ secrets.JEEVEZ_DB_PASSWORD }} \
           JEEVEZ_CURRENCYAPI_TOKEN=${{ secrets.JEEVEZ_CURRENCYAPI_TOKEN }} \
           JEEVEZ_WEATHERAPI_TOKEN=${{ secrets.JEEVEZ_WEATHERAPI_TOKEN }} \
+          JEEVEZ_ADMIN_EMAIL=${{ secrets.JEEVEZ_ADMIN_EMAIL }} \
+          JEEVEZ_ADMIN_TELEGRAMID=${{ secrets.JEEVEZ_ADMIN_TELEGRAMID }} \
+          JEEVEZ_MAIL_HOST=${{ secrets.JEEVEZ_MAIL_HOST }} \
+          JEEVEZ_MAIL_LOGIN=${{ secrets.JEEVEZ_MAIL_LOGIN }} \
+          JEEVEZ_MAIL_PASSWORD=${{ secrets.JEEVEZ_MAIL_PASSWORD }} \
+          JEEVEZ_MAIL_PRIMARYDOMAIN=${{ secrets.JEEVEZ_MAIL_PRIMARYDOMAIN }} \
+          JEEVEZ_MAIL_TEMPMAILDOMAIN=${{ secrets.JEEVEZ_MAIL_TEMPMAILDOMAIN }} \
           docker-compose -f deploy/docker-compose.yml \
                          -f deploy/docker-compose.db.yml \
           	             --project-directory . \
