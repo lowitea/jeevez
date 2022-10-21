@@ -14,7 +14,7 @@ type BotAPIMock struct {
 // Send замоканный метод отправки сообщений в апи
 func (s *BotAPIMock) Send(c tgbotapi.Chattable) (tgbotapi.Message, error) {
 	args := s.Called(c)
-	return args.Get(0).(tgbotapi.Message), args.Error(1)
+	return args.Get(0).(tgbotapi.Message), args.Error(1) //nolint:forcetypeassert
 }
 
 // NewBotAPIMock возвращает настроенный мок для бота

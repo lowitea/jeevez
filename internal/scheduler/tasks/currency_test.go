@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	FAKE_RESP_BODY = `
+	FakeRespBody = `
 {
   "result": "success",
   "documentation": "https://www.exchangerate-api.com/docs",
@@ -26,7 +26,7 @@ const (
 }
 `
 
-	EXPECT_RATE = 0.8713
+	ExpectRate = 0.8713
 )
 
 // TestGetCurrencyRate проверяет функцию получения валют
@@ -51,10 +51,10 @@ func TestGetCurrencyRate(t *testing.T) {
 	assert.Equal(t, errors.New("error parsed currency api"), err)
 
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
+		return &http.Response{Body: fakeBody{content: FakeRespBody}}, nil
 	}
 	rate, err = getCurrencyRate("")
-	assert.Equal(t, EXPECT_RATE, rate)
+	assert.Equal(t, ExpectRate, rate)
 	assert.NoError(t, err)
 }
 
@@ -74,7 +74,7 @@ func TestCurrencyTask(t *testing.T) {
 
 	// проверяем на пустой базе
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
+		return &http.Response{Body: fakeBody{content: FakeRespBody}}, nil
 	}
 	CurrencyTask(db)
 
@@ -84,12 +84,12 @@ func TestCurrencyTask(t *testing.T) {
 	expRatesCount := len(currencies) * (len(currencies) - 1)
 	assert.Len(t, rates, expRatesCount)
 	for _, r := range rates {
-		assert.Equal(t, EXPECT_RATE, r.Value)
+		assert.Equal(t, ExpectRate, r.Value)
 	}
 
 	// проверяем обновление данных
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
+		return &http.Response{Body: fakeBody{content: FakeRespBody}}, nil
 	}
 	CurrencyTask(db)
 
@@ -97,7 +97,7 @@ func TestCurrencyTask(t *testing.T) {
 
 	assert.Len(t, rates, expRatesCount)
 	for _, r := range rates {
-		assert.Equal(t, EXPECT_RATE, r.Value)
+		assert.Equal(t, ExpectRate, r.Value)
 	}
 
 	// ломаем базу

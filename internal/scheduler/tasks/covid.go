@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/lowitea/jeevez/internal/models"
-	"gorm.io/gorm"
-	"io/ioutil"
+	"io"
 	"log"
 	"time"
+
+	"github.com/lowitea/jeevez/internal/models"
+	"gorm.io/gorm"
 )
 
 // covidStat структура с ответом от апи статистки по ковиду
@@ -55,7 +56,7 @@ func getData(url string) ([]covidStat, error) {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
 		return nil, err
