@@ -3,16 +3,18 @@ package subscriptions
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"time"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/structs"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gorm.io/gorm"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"strings"
-	"time"
 )
 
 var Cities = map[string]int{
@@ -84,7 +86,7 @@ func getWeatherAPIData(cityID int) (*weatherData, error) {
 		}
 	}
 
-	resp, err := http.Get(fmt.Sprintf(weatherURL, cityID, config.Cfg.WeatherAPI.Token)) // nolint
+	resp, err := http.Get(fmt.Sprintf(weatherURL, cityID, config.Cfg.WeatherAPI.Token)) //nolint:noctx
 	if err != nil {
 		log.Printf("Error get data: %s", err)
 		return nil, err
@@ -92,7 +94,7 @@ func getWeatherAPIData(cityID int) (*weatherData, error) {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
 		return nil, err
@@ -117,6 +119,7 @@ func GetWeatherMessage(city string) string {
 	}
 
 	loc, _ := time.LoadLocation("Europe/Moscow")
+	title := cases.Title(language.Russian)
 
 	return fmt.Sprintf(
 		"🌡  %.0f° (ощущается %.0f°)\n"+
@@ -126,7 +129,7 @@ func GetWeatherMessage(city string) string {
 			"💨  Ветер: %.1f м/c, порывы до %.1f м/c\n\n"+
 			"🌅  Восход: %s   🌇  Закат: %s\n",
 		data.Main.Temp, data.Main.FeelsLike,
-		Icons[data.Weather[0].Icon], strings.Title(data.Weather[0].Description),
+		Icons[data.Weather[0].Icon], title.String(data.Weather[0].Description),
 		data.Main.Pressure, data.Main.Humidity,
 		data.Wind.Speed, data.Wind.Gust,
 		time.Unix(data.Sys.Sunrise, 0).In(loc).Format("15:04:05"),

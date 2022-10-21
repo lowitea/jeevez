@@ -3,16 +3,18 @@ package subscriptions
 import (
 	"embed"
 	"fmt"
+	"math/rand"
+	"path"
+	"time"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
-	"math/rand"
-	"path"
-	"time"
 )
 
-// максимальная длина названия позы - 26 символов
+// Максимальная длина названия позы 26 символов
+
 //goland:noinspection SpellCheckingInspection
 var yogaPoses = map[string]string{
 	"Джатхара паривартанасана":   "1.jpg",

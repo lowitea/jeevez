@@ -1,16 +1,17 @@
 package subscriptions
 
 import (
+	"log"
+	"time"
+
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/structs"
 	"gorm.io/gorm"
-	"log"
-	"time"
 )
 
 // getNowTimeInterval получить округлённый временной интервал на основе текущего времени.
-// 					  Например, если сейчас 17:23, вернётся 62400 и 62990,
-//					  это 17:20:00 и 17:29:50 переведённое в минуты.
+// Например, если сейчас 17:23, вернётся 62400 и 62990,
+// это 17:20:00 и 17:29:50 переведённое в минуты.
 func getNowTimeInterval(now time.Time) (minTime int, maxTime int) {
 	roundedMinMinutes := now.Minute() / 10 * 10
 	minTime = now.Hour()*3600 + roundedMinMinutes*60

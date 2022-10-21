@@ -2,22 +2,21 @@ package mail
 
 import (
 	"encoding/json"
-	"github.com/lowitea/jeevez/internal/config"
 	mRand "math/rand"
 	"net/http"
 	"net/url"
+
+	"github.com/lowitea/jeevez/internal/config"
 )
 
 const (
 	createMailboxEndpoint         = "/api/mail/createMailbox"
 	changeMailboxSettingsEndpoint = "/api/mail/changeMailboxSettings"
 	forwardListAddMailboxEndpoint = "/api/mail/forwardListAddMailbox"
-	//MailboxForwardOption          = "forward_and_delete"
+	// MailboxForwardOption          = "forward_and_delete"
 	MailboxForwardOption = "forward"
 	tempMailboxPwdLen    = 32
 )
-
-var tempMailboxNameRunes = []rune("abcdefghijklmnopqrstuvwxyz")
 
 type createMailboxData struct {
 	Domain          string `json:"domain"`
@@ -68,7 +67,7 @@ func CreateMail(domain, mName string) (mBox string) {
 			"input_data":    {string(iData)},
 		}
 		rURL.RawQuery = params.Encode()
-		return http.Get(rURL.String())
+		return http.Get(rURL.String()) //nolint:noctx
 	}
 
 	// создаём новый ящик

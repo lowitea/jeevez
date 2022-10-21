@@ -2,7 +2,6 @@ linters:
   enable:
     - gofmt
     - asciicheck
-    - bodyclose
     - cyclop
     - depguard
     - dogsled
@@ -25,7 +24,6 @@ linters:
     - gomodguard
     - goprintffuncname
     - gosec
-    - ifshort
     - importas
     - lll
     - makezero

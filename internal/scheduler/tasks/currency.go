@@ -3,7 +3,7 @@ package tasks
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"regexp"
 	"strconv"
@@ -44,7 +44,7 @@ func getCurrencyRate(targetURL string) (float64, error) {
 
 	defer func() { _ = resp.Body.Close() }()
 
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err = io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("Error get data: %s", err)
 		return 0, err
