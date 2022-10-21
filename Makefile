@@ -30,7 +30,8 @@ start-testdb: stop-testdb  ## Запуск тестовой базы данны�
 
 .PHONY: tests
 tests: start-testdb
-	go test -count=1 -p 1 -race ./...
+	sleep 1
+	go test -cover -count=1 -p 1 -race ./...
 	make stop-testdb
 
 .PHONY: check
