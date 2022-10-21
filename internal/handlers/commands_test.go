@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"fmt"
+	"testing"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/tools/testtools"
-	"testing"
 )
 
 // TestBaseCommandHandler проверяет обработчик базовых команд
@@ -15,7 +16,7 @@ func TestBaseCommandHandler(t *testing.T) {
 		MsgText string
 	}{
 		{"/version", config.Cfg.App.Version},
-		{"/help", HelpText},
+		{"/help", HelpText + "\n\n\n⚠ Команды администратора:\n\n" + AdminHelpText},
 		{"/roll", "65"},
 	}
 

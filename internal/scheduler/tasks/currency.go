@@ -3,18 +3,19 @@ package tasks
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/models"
 	"gorm.io/gorm"
-	"io/ioutil"
-	"log"
-	"net/url"
-	"regexp"
-	"strconv"
 )
 
 var currencies = [...]string{
-	"USD", "RUB", "EUR", "GBP", "PLN",
+	"USD", "RUB", "EUR", "GBP", "PLN", "TRY",
 }
 
 // currencyPairs доступные валютные пары, по которым запрашиваются данные
@@ -51,7 +52,7 @@ func getCurrencyRate(targetURL string) (float64, error) {
 
 	bodyStr := string(body)
 
-	tpl := regexp.MustCompile(`{"\w{3}_\w{3}":(\d+\.\d+)}`)
+	tpl := regexp.MustCompile(`"conversion_rate":\s?(\d+\.\d+)`)
 	parsedBody := tpl.FindStringSubmatch(bodyStr)
 
 	if len(parsedBody) < 2 {
@@ -72,18 +73,16 @@ func CurrencyTask(db *gorm.DB) {
 		log.Printf("db is nil")
 		return
 	}
-	baseURL := url.URL{
-		Scheme: config.CurrencyAPIScheme,
-		Host:   config.CurrencyAPIHost,
-		Path:   config.CurrencyAPIPath,
-	}
+	baseURL := fmt.Sprintf(
+		"%s://%s/%s",
+		config.CurrencyAPIScheme, config.CurrencyAPIHost, fmt.Sprintf(
+			config.CurrencyAPIPath, config.Cfg.CurrencyAPI.Token,
+		),
+	)
 
 	for _, curPair := range currencyPairs {
-		curURL := baseURL
-		token := config.Cfg.CurrencyAPI.Token
-		curURL.RawQuery = fmt.Sprintf("q=%s&compact=ultra&apiKey=%s", curPair, token)
-
-		curRate, err := getCurrencyRate(curURL.String())
+		curURL := fmt.Sprintf("%s/%s", baseURL, strings.ReplaceAll(curPair, "_", "/"))
+		curRate, err := getCurrencyRate(curURL)
 		if err != nil {
 			log.Printf("getting currency rate error: %s", err)
 			return

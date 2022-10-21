@@ -2,11 +2,31 @@ package tasks
 
 import (
 	"errors"
+	"net/http"
+	"testing"
+
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
+)
+
+const (
+	FAKE_RESP_BODY = `
+{
+  "result": "success",
+  "documentation": "https://www.exchangerate-api.com/docs",
+  "terms_of_use": "https://www.exchangerate-api.com/terms",
+  "time_last_update_unix": 1666224001,
+  "time_last_update_utc": "Thu, 20 Oct 2022 00:00:01 +0000",
+  "time_next_update_unix": 1666310401,
+  "time_next_update_utc": "Fri, 21 Oct 2022 00:00:01 +0000",
+  "base_code": "EUR",
+  "target_code": "GBP",
+  "conversion_rate": 0.8713
+}
+`
+
+	EXPECT_RATE = 0.8713
 )
 
 // TestGetCurrencyRate проверяет функцию получения валют
@@ -31,10 +51,10 @@ func TestGetCurrencyRate(t *testing.T) {
 	assert.Equal(t, errors.New("error parsed currency api"), err)
 
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: `{"RUB_EUR":0.01183}`}}, nil
+		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
 	}
 	rate, err = getCurrencyRate("")
-	assert.Equal(t, 0.01183, rate)
+	assert.Equal(t, EXPECT_RATE, rate)
 	assert.NoError(t, err)
 }
 
@@ -54,7 +74,7 @@ func TestCurrencyTask(t *testing.T) {
 
 	// проверяем на пустой базе
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: `{"RUB_EUR":0.01183}`}}, nil
+		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
 	}
 	CurrencyTask(db)
 
@@ -64,12 +84,12 @@ func TestCurrencyTask(t *testing.T) {
 	expRatesCount := len(currencies) * (len(currencies) - 1)
 	assert.Len(t, rates, expRatesCount)
 	for _, r := range rates {
-		assert.Equal(t, 0.01183, r.Value)
+		assert.Equal(t, EXPECT_RATE, r.Value)
 	}
 
 	// проверяем обновление данных
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: `{"RUB_EUR":0.42}`}}, nil
+		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
 	}
 	CurrencyTask(db)
 
@@ -77,7 +97,7 @@ func TestCurrencyTask(t *testing.T) {
 
 	assert.Len(t, rates, expRatesCount)
 	for _, r := range rates {
-		assert.Equal(t, 0.42, r.Value)
+		assert.Equal(t, EXPECT_RATE, r.Value)
 	}
 
 	// ломаем базу
