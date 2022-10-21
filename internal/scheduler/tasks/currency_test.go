@@ -2,12 +2,28 @@ package tasks
 
 import (
 	"errors"
+	"net/http"
+	"testing"
+
 	"github.com/lowitea/jeevez/internal/models"
 	"github.com/lowitea/jeevez/internal/tools/testtools"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
 )
+
+const FAKE_RESP_BODY = `
+{
+  "result": "success",
+  "documentation": "https://www.exchangerate-api.com/docs",
+  "terms_of_use": "https://www.exchangerate-api.com/terms",
+  "time_last_update_unix": 1666224001,
+  "time_last_update_utc": "Thu, 20 Oct 2022 00:00:01 +0000",
+  "time_next_update_unix": 1666310401,
+  "time_next_update_utc": "Fri, 21 Oct 2022 00:00:01 +0000",
+  "base_code": "EUR",
+  "target_code": "GBP",
+  "conversion_rate": 0.8713
+}
+`
 
 // TestGetCurrencyRate проверяет функцию получения валют
 func TestGetCurrencyRate(t *testing.T) {
@@ -31,7 +47,7 @@ func TestGetCurrencyRate(t *testing.T) {
 	assert.Equal(t, errors.New("error parsed currency api"), err)
 
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: `{"RUB_EUR":0.01183}`}}, nil
+		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
 	}
 	rate, err = getCurrencyRate("")
 	assert.Equal(t, 0.01183, rate)
@@ -54,7 +70,7 @@ func TestCurrencyTask(t *testing.T) {
 
 	// проверяем на пустой базе
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: `{"RUB_EUR":0.01183}`}}, nil
+		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
 	}
 	CurrencyTask(db)
 
@@ -69,7 +85,7 @@ func TestCurrencyTask(t *testing.T) {
 
 	// проверяем обновление данных
 	httpGet = func(_ string) (*http.Response, error) {
-		return &http.Response{Body: fakeBody{content: `{"RUB_EUR":0.42}`}}, nil
+		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
 	}
 	CurrencyTask(db)
 

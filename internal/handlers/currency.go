@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/lowitea/jeevez/internal/models"
-	"github.com/lowitea/jeevez/internal/structs"
-	"gorm.io/gorm"
 	"log"
 	"regexp"
 	"strconv"
 	"strings"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/lowitea/jeevez/internal/models"
+	"github.com/lowitea/jeevez/internal/structs"
+	"gorm.io/gorm"
 )
 
 const (
@@ -20,6 +21,7 @@ const (
 	EUR = "EUR"
 	GBP = "GBP"
 	PLN = "PLN"
+	TRY = "TRY"
 )
 
 var firstCurPatterns = map[string]string{
@@ -40,6 +42,10 @@ var firstCurPatterns = map[string]string{
 	"злотый":   PLN,
 	"злотых":   PLN,
 	"zł":       PLN,
+	"лира":     TRY,
+	"лир":      TRY,
+	"лиры":     TRY,
+	"₺":        TRY,
 }
 
 var secCurPatterns = map[string]string{
@@ -53,6 +59,8 @@ var secCurPatterns = map[string]string{
 	"£":       GBP,
 	"злотые":  PLN,
 	"zł":      PLN,
+	"лиры":    TRY,
+	"₺":       TRY,
 }
 
 var msgTemplate *regexp.Regexp
