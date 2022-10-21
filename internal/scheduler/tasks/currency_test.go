@@ -10,7 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const FAKE_RESP_BODY = `
+const (
+	FAKE_RESP_BODY = `
 {
   "result": "success",
   "documentation": "https://www.exchangerate-api.com/docs",
@@ -24,6 +25,9 @@ const FAKE_RESP_BODY = `
   "conversion_rate": 0.8713
 }
 `
+
+	EXPECT_RATE = 0.8713
+)
 
 // TestGetCurrencyRate проверяет функцию получения валют
 func TestGetCurrencyRate(t *testing.T) {
@@ -50,7 +54,7 @@ func TestGetCurrencyRate(t *testing.T) {
 		return &http.Response{Body: fakeBody{content: FAKE_RESP_BODY}}, nil
 	}
 	rate, err = getCurrencyRate("")
-	assert.Equal(t, 0.01183, rate)
+	assert.Equal(t, EXPECT_RATE, rate)
 	assert.NoError(t, err)
 }
 
@@ -80,7 +84,7 @@ func TestCurrencyTask(t *testing.T) {
 	expRatesCount := len(currencies) * (len(currencies) - 1)
 	assert.Len(t, rates, expRatesCount)
 	for _, r := range rates {
-		assert.Equal(t, 0.01183, r.Value)
+		assert.Equal(t, EXPECT_RATE, r.Value)
 	}
 
 	// проверяем обновление данных
@@ -93,7 +97,7 @@ func TestCurrencyTask(t *testing.T) {
 
 	assert.Len(t, rates, expRatesCount)
 	for _, r := range rates {
-		assert.Equal(t, 0.42, r.Value)
+		assert.Equal(t, EXPECT_RATE, r.Value)
 	}
 
 	// ломаем базу
