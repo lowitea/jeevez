@@ -2,17 +2,18 @@ package app
 
 import (
 	"fmt"
-	"github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"log"
+	"math/rand"
+	"strings"
+	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/lowitea/jeevez/internal/config"
 	"github.com/lowitea/jeevez/internal/handlers"
 	"github.com/lowitea/jeevez/internal/scheduler"
 	"github.com/lowitea/jeevez/internal/structs"
 	"github.com/lowitea/jeevez/internal/tools"
 	"gorm.io/gorm"
-	"log"
-	"math/rand"
-	"strings"
-	"time"
 )
 
 type appDepContainer struct {
@@ -24,17 +25,16 @@ type appDepContainer struct {
 
 // checkRecipient проверяет что сообщение адресовано именно этому боту
 func checkRecipient(update *tgbotapi.Update, botName string) bool {
-	args := strings.Split(update.Message.Text, "@")
-
 	if update.Message.Chat.IsPrivate() {
-		update.Message.Text = args[0]
 		return true
 	}
+
+	args := strings.Split(update.Message.Text, "@")
 
 	if len(args) != 2 || args[1] != botName {
 		return false
 	}
-	update.Message.Text = args[0]
+	update.Message.Text = strings.TrimSpace(args[0])
 	return true
 }
 

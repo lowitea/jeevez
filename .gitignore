@@ -19,6 +19,7 @@ vendor/
 # Local
 /dumps
 /deploy/host/ACTIONS_RUNNER_TOKEN
+.env
 
 # IDE
 .idea
